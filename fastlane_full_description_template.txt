@@ -1,0 +1,19 @@
+<p>
+本地听歌是一款离线本地音乐播放器，首版重点支持设备上的 MP3 文件。<br>
+<br>
+- 轻量、稳定、简洁<br>
+- 沿用 Android 标准和 Material 3 界面<br>
+- 使用 MediaStore 快速访问设备上的本地音乐<br>
+- 支持搜索、浏览、列表和网格视图<br>
+- 支持按文件夹和文件系统浏览歌曲<br>
+- 支持自然排序和多种排序方式<br>
+- 保留队列、歌单、后台播放、锁屏媒体控制和蓝牙媒体按键<br>
+<br>
+本版本采用离线方案：不申请网络权限，不提供在线歌词、在线封面、外链更新和在线播放。核心扫描与播放流程不以网络为前提。<br>
+<br>
+本地听歌及本次修改遵循 GPLv3.0 或更高版本许可证。上游项目地址：<a href="https://github.com/FoedusProgramme/Gramophone">https://github.com/FoedusProgramme/Gramophone</a><br>
+<br>
+说明：不同设备的系统解码器能力不同，未承诺的音频格式可能无法播放；本次 MVP 只重点验收 MP3。<br>
+<br>
+隐私政策地址：<a href="https://foedusprogramme.github.io/org/privacy.html">https://foedusprogramme.github.io/org/privacy.html</a>
+</p>
