@@ -51,6 +51,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.akanework.gramophone.logic.emitOrDie
 import org.akanework.gramophone.logic.hasAudioPermission
+import org.akanework.gramophone.logic.hasMediaLibraryPermission
 import org.akanework.gramophone.logic.utils.flows.Invalidation
 import org.akanework.gramophone.logic.utils.flows.PauseManagingSharedFlow.Companion.sharePauseableIn
 import org.akanework.gramophone.logic.utils.flows.conflateAndBlockWhenPaused
@@ -216,7 +217,7 @@ class FlowReader(
         }
     }).shareIn(scope, Eagerly, replay = 1)
     private val mediaVersionFlow = contentObserverVersioningFlow(
-        context, scope, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true
+        context, scope, MediaStoreCompat.FILES_EXTERNAL_CONTENT_URI, true
     ).shareIn(scope, Eagerly, replay = 1)
 
     private suspend fun maybeDoRead(
@@ -229,7 +230,7 @@ class FlowReader(
         // TODO repeatUntilDoneWhenUnpaused makes no sense with non-cancelable
         //  function, make it cancelable
         try {
-            if (context.hasAudioPermission())
+            if (context.hasMediaLibraryPermission())
                 Reader.readFromMediaStore(
                     context,
                     minSongLengthSeconds,

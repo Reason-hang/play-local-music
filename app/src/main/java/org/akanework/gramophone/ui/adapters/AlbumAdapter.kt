@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.getFile
-import org.akanework.gramophone.logic.requireMediaStoreId
 import org.akanework.gramophone.ui.MainActivity
 import org.akanework.gramophone.ui.fragments.GeneralSubFragment
 import uk.akane.libphonograph.items.Album
@@ -99,7 +98,7 @@ class AlbumAdapter(
                     CoroutineScope(Dispatchers.Default).launch {
                         val res = ItemManipulator.deleteSongs(
                             mainActivity,
-                            item.songList.map { it.getFile()!! to it.requireMediaStoreId() }
+                            item.songList.map { it.getFile()!! to it.localConfiguration!!.uri }
                         )
                         if (res != null) {
                             withContext(Dispatchers.Main) {

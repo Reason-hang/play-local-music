@@ -55,7 +55,7 @@ object ItemManipulator {
     const val FAVORITES = "gramophone_favourite"
     const val DEFAULT_FORMAT = "m3u"
 
-    suspend fun deleteSongs(context: MainActivity, list: List<Pair<File, Long>>): (() -> Unit)? {
+    suspend fun deleteSongs(context: MainActivity, list: List<Pair<File, Uri>>): (() -> Unit)? {
         val faves = context.gramophoneApplication.reader.playlistListFlow.map { it.find { p ->
             p is Favorite } }.first()
         val songsToUnfave = faves?.let { _ -> list.filter { faves.songList.find { song ->
@@ -78,11 +78,8 @@ object ItemManipulator {
             }
         }
         val uris = list.flatMap {
-            val id = it.second
             val file = it.first
-            val uri = ContentUris.withAppendedId(
-                MediaStore.Audio.Media.getContentUri("external"), id
-            )
+            val uri = it.second
             // TODO maybe don't hardcode these extensions twice, here and in LrcUtils?
             val extensions = setOf("ttml", "lrc", "srt")
             if (!Flags.MEDIASTORE_IO) {

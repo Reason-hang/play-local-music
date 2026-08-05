@@ -14,8 +14,11 @@
     <!-- Notifications (for error handling on MIUI) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"
         android:minSdkVersion="33" />
-    <!-- Read music files (Android 13 and later) (includes .lrc and thumbnails) -->
+    <!-- Read local music files (Android 13 and later). -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"
+        android:minSdkVersion="33" />
+    <!-- Read MP4 containers so their AAC audio tracks can be added to the local library. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"
         android:minSdkVersion="33" />
     <!-- Read music files, .lrc files and cover files (Android 12 and earlier) -->
     <uses-permission

@@ -26,7 +26,6 @@ import android.database.MatrixCursor
 import android.media.Rating
 import android.net.Uri
 import android.provider.BaseColumns
-import android.provider.MediaStore
 import androidx.media3.common.HeartRating
 import androidx.media3.common.MediaItem
 import kotlinx.coroutines.flow.first
@@ -139,8 +138,7 @@ class SearchSuggestionsProvider : ContentProvider() {
                 it.mediaMetadata.title, // query
                 it.mediaMetadata.artworkUri?.toString() ?: "android.resource://${context!!
                     .packageName}/${R.drawable.ic_default_cover}",
-                ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    it.requireMediaStoreId()),
+                it.localConfiguration?.uri,
                 it.requireMediaStoreId(),
                 it.localConfiguration?.mimeType,
                 it.mediaMetadata.durationMs,

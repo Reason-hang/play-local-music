@@ -28,7 +28,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Intent
 import android.content.IntentSender
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -87,8 +86,10 @@ import org.akanework.gramophone.logic.enableEdgeToEdgeProperly
 import org.akanework.gramophone.logic.getBooleanStrict
 import org.akanework.gramophone.logic.gramophoneApplication
 import org.akanework.gramophone.logic.hasAudioPermission
+import org.akanework.gramophone.logic.hasMediaLibraryPermission
 import org.akanework.gramophone.logic.hasScopedStorageV2
 import org.akanework.gramophone.logic.hasScopedStorageWithMediaTypes
+import org.akanework.gramophone.logic.hasVideoPermission
 import org.akanework.gramophone.logic.needsMissingOnDestroyCallWorkarounds
 import org.akanework.gramophone.logic.postAtFrontOfQueueAsync
 import org.akanework.gramophone.logic.ui.BaseActivity
@@ -233,12 +234,15 @@ class MainActivity : BaseActivity() {
         playerBottomSheet = findViewById(R.id.player_layout)
 
         // Check all permissions.
-        if (!hasAudioPermission()) {
+        if (!hasAudioPermission() || (hasScopedStorageWithMediaTypes() && !hasVideoPermission())) {
             // Ask if was denied.
             ActivityCompat.requestPermissions(
                 this,
                 if (hasScopedStorageWithMediaTypes())
-                    arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO)
+                    arrayOf(
+                        android.Manifest.permission.READ_MEDIA_AUDIO,
+                        android.Manifest.permission.READ_MEDIA_VIDEO
+                    )
                 else if (hasScopedStorageV2())
                     arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 else
@@ -794,9 +798,7 @@ class MainActivity : BaseActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == PERMISSION_READ_MEDIA_AUDIO) {
-            if (grantResults.isNotEmpty() &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
+            if (hasMediaLibraryPermission()) {
                 updateLibrary()
             } else {
                 maybeReportFullyDrawn() // TODO: is this still needed?

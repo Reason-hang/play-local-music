@@ -711,6 +711,28 @@ inline fun Context.hasAudioPermission() =
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED)
 
+/**
+ * Android 13+ protects video and audio libraries separately. MP4 files carrying an AAC track
+ * belong to the video collection even though this app only renders their audio.
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun Context.hasVideoPermission() =
+    hasScopedStorageWithMediaTypes() && ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.READ_MEDIA_VIDEO
+    ) == PackageManager.PERMISSION_GRANTED ||
+            (!hasScopedStorageV2() && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED) ||
+            (!hasScopedStorageWithMediaTypes() && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Context.hasMediaLibraryPermission() = hasAudioPermission() || hasVideoPermission()
+
 // use below functions if accessing from UI thread only
 @Suppress("NOTHING_TO_INLINE")
 @Contract(value = "_,!null->!null")

@@ -20,6 +20,8 @@ package uk.akane.libphonograph.reader
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -39,8 +41,10 @@ import org.akanework.gramophone.logic.getFile
 import org.akanework.gramophone.logic.hasAudioPermission
 import org.akanework.gramophone.logic.hasImagePermission
 import org.akanework.gramophone.logic.hasImprovedMediaStore
+import org.akanework.gramophone.logic.hasMediaLibraryPermission
 import org.akanework.gramophone.logic.hasScopedStorageV1
 import org.akanework.gramophone.logic.hasScopedStorageWithMediaTypes
+import org.akanework.gramophone.logic.hasVideoPermission
 import org.akanework.gramophone.logic.requireMediaStoreId
 import org.akanework.gramophone.logic.utils.Flags
 import org.nift4.mediastorecompat.MediaStoreCompat
@@ -120,6 +124,117 @@ internal object Reader {
             }
         }.toTypedArray()
 
+    private val mp4Projection = arrayOf(
+        MediaStore.Video.Media._ID,
+        MediaStore.Video.Media.DISPLAY_NAME,
+        MediaStore.Video.Media.TITLE,
+        MediaStore.Video.Media.DATA,
+        MediaStore.Video.Media.MIME_TYPE,
+        MediaStore.Video.Media.DURATION,
+        MediaStore.Video.Media.DATE_ADDED,
+        MediaStore.Video.Media.DATE_MODIFIED
+    )
+
+    /**
+     * The product scope is deliberately limited to MP4 containers with an AAC audio track.
+     * A video renderer is not installed, so no MP4 picture track is surfaced to the user.
+     */
+    internal fun isSupportedMp4Aac(
+        containerMimeType: String?,
+        fileName: String,
+        trackMimeTypes: Iterable<String?>
+    ): Boolean {
+        val isMp4Container = containerMimeType.equals("video/mp4", true) ||
+                containerMimeType.equals("application/mp4", true) ||
+                fileName.substringAfterLast('.', "").equals("mp4", true)
+        return isMp4Container && trackMimeTypes.any {
+            it.equals(MediaFormat.MIMETYPE_AUDIO_AAC, true)
+        }
+    }
+
+    private fun hasAacAudioTrack(
+        context: Context,
+        uri: Uri,
+        containerMimeType: String?,
+        fileName: String
+    ): Boolean {
+        val extractor = MediaExtractor()
+        return try {
+            extractor.setDataSource(context, uri, null)
+            isSupportedMp4Aac(
+                containerMimeType,
+                fileName,
+                (0 until extractor.trackCount).map { index ->
+                    extractor.getTrackFormat(index).getString(MediaFormat.KEY_MIME)
+                }
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to inspect local MP4 audio track", e)
+            false
+        } finally {
+            extractor.release()
+        }
+    }
+
+    private fun isBlacklistedByFolder(
+        pathFile: File,
+        parent: File?,
+        volumes: List<StorageVolumeCompat>,
+        blackListSet: List<String>,
+        whiteListSet: List<String>,
+        blackListSetIn: Set<String>,
+        folders: MutableSet<String>?,
+        foldersForWhitelist: MutableSet<String>?
+    ): Boolean {
+        var isBlacklisted = false
+        if (whiteListSet.isNotEmpty()) {
+            isBlacklisted = true
+            var folder: File? = pathFile
+            while (folder != null) {
+                if (whiteListSet.contains(folder.absolutePath)) {
+                    isBlacklisted = false
+                    break
+                }
+                folder = folder.parentFile
+            }
+        }
+        if (!isBlacklisted && blackListSet.isNotEmpty()) {
+            var folder: File? = pathFile
+            while (folder != null) {
+                if (blackListSet.contains(folder.absolutePath)) {
+                    isBlacklisted = true
+                    if (!blackListSetIn.contains(folder.absolutePath)) {
+                        folders?.add(blackListSetIn.first {
+                            if (it.first() == '/') {
+                                it == folder.absolutePath
+                            } else {
+                                volumes.find { volume ->
+                                    volume.requireCanonicalDirectory().resolve(it)
+                                        .absolutePath == folder.absolutePath
+                                } != null
+                            }
+                        })
+                    }
+                    break
+                }
+                folder = folder.parentFile
+            }
+        }
+        if (foldersForWhitelist != null) {
+            var folder = parent
+            while (folder != null) {
+                foldersForWhitelist.add(folder.absolutePath)
+                folder = folder.parentFile
+                if (folder != null && (folder.absolutePath == "/storage/emulated" ||
+                            folder.absolutePath == "/storage")
+                ) {
+                    folder = null
+                }
+            }
+        }
+        return isBlacklisted
+    }
+
     /*
      * This takes the approach of reading all song columns and inferring collections such as:
      * - albums
@@ -158,8 +273,8 @@ internal object Reader {
         if (!shouldLoadFilesystem && shouldUseEnhancedCoverReading != false) {
             throw IllegalArgumentException("Enhanced cover loading requires loading filesystem")
         }
-        if (!context.hasAudioPermission()) {
-            throw SecurityException("Audio permission is not granted")
+        if (!context.hasMediaLibraryPermission()) {
+            throw SecurityException("Local media permission is not granted")
         }
         val volumes = StorageManagerCompat.getStorageVolumes(context)
             .filter { it.canonicalDirectory != null }
@@ -210,7 +325,7 @@ internal object Reader {
             MediaStore.getExternalVolumeNames(context).contains(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         } else true
         val sortOrder = MediaStore.Audio.Media.TITLE + " COLLATE UNICODE ASC"
-        val cursor = if (hasVolume) {
+        val cursor = if (hasVolume && context.hasAudioPermission()) {
             // TODO: convert coroutine cancellation to cancellationSignal
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val queryArgs = Bundle()
@@ -279,50 +394,10 @@ internal object Reader {
                 val pathFile = File(path)
                 val parent = pathFile.parentFile?.takeIf { it.absolutePath != "/" }
                 val fldPath = parent?.absolutePath
-                var isBlacklisted = false
-                if (whiteListSet.isNotEmpty()) {
-                    isBlacklisted = true
-                    var f: File? = pathFile
-                    while (f != null) {
-                        if (whiteListSet.contains(f.absolutePath)) {
-                            isBlacklisted = false
-                            break
-                        }
-                        f = f.parentFile
-                    }
-                }
-                if (!isBlacklisted && blackListSet.isNotEmpty()) {
-                    var f: File? = pathFile
-                    while (f != null) {
-                        if (blackListSet.contains(f.absolutePath)) {
-                            isBlacklisted = true
-                            if (!blackListSetIn.contains(f.absolutePath)) {
-                                folders!!.add(blackListSetIn.first {
-                                    if (it.first() == '/')
-                                        it == f.absolutePath
-                                    else // relative path = applies to every volume
-                                        volumes.find { volume ->
-                                            volume.requireCanonicalDirectory().resolve(it)
-                                                .absolutePath == f.absolutePath
-                                        } != null
-                                })
-                            }
-                            break
-                        }
-                        f = f.parentFile
-                    }
-                }
-                if (shouldLoadFolders) {
-                    var tmpPath = parent
-                    while (tmpPath != null) {
-                        foldersForWhitelist!!.add(tmpPath.absolutePath)
-                        tmpPath = tmpPath.parentFile
-                        if (tmpPath != null && (tmpPath.absolutePath == "/storage/emulated"
-                                    || tmpPath.absolutePath == "/storage")
-                        )
-                            tmpPath = null // let's not allow to whitelist more than entire volumes
-                    }
-                }
+                val isBlacklisted = isBlacklistedByFolder(
+                    pathFile, parent, volumes, blackListSet, whiteListSet, blackListSetIn,
+                    folders, foldersForWhitelist
+                )
                 val skip = (duration != null && duration != 0L &&
                         duration < minSongLengthSeconds * 1000) || fldPath == null || isBlacklisted
                 // We need to add blacklisted songs to idMap as they can be referenced by playlist
@@ -511,6 +586,95 @@ internal object Reader {
                                     || tmpPath.absolutePath == "/storage")
                         )
                             tmpPath = null // let's not allow to blacklist more than entire volumes
+                    }
+                }
+            }
+        }
+
+        if (hasVolume && context.hasVideoPermission()) {
+            val mp4Cursor = context.contentResolver.query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                mp4Projection,
+                "${MediaStore.Video.Media.MIME_TYPE} = ? OR ${MediaStore.Video.Media.DISPLAY_NAME} LIKE ?",
+                arrayOf("video/mp4", "%.mp4"),
+                "${MediaStore.Video.Media.TITLE} COLLATE UNICODE ASC"
+            )
+            mp4Cursor?.use {
+                val idColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+                val fileNameColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+                val titleColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
+                val pathColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+                val mimeTypeColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.MIME_TYPE)
+                val durationColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+                val addDateColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+                val modifiedDateColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
+
+                while (it.moveToNext()) {
+                    val path = it.getString(pathColumn) ?: continue
+                    val pathFile = File(path)
+                    val parent = pathFile.parentFile?.takeIf { folder -> folder.absolutePath != "/" }
+                    val folderPath = parent?.absolutePath
+                    val duration = it.getLongOrNullIfThrow(durationColumn)
+                        ?.let { length -> if (length >= 0) length else null }
+                    val isBlacklisted = isBlacklistedByFolder(
+                        pathFile, parent, volumes, blackListSet, whiteListSet, blackListSetIn,
+                        folders, foldersForWhitelist
+                    )
+                    val skip = (duration != null && duration != 0L &&
+                            duration < minSongLengthSeconds * 1000) ||
+                            folderPath == null || isBlacklisted
+                    if (skip && idMap == null && pathMap == null) continue
+
+                    val id = it.getLong(idColumn)
+                    val fileName = it.getString(fileNameColumn) ?: pathFile.name
+                    val mimeType = it.getStringOrNull(mimeTypeColumn)
+                    val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                    if (!hasAacAudioTrack(context, uri, mimeType, fileName)) continue
+
+                    val song = MediaItem.Builder()
+                        .setUri(uri)
+                        .setMediaId("MediaStore:$id")
+                        .setMimeType(mimeType ?: "video/mp4")
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setIsBrowsable(false)
+                                .setIsPlayable(true)
+                                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+                                .setDurationMs(duration)
+                                .setTitle(it.getString(titleColumn) ?: pathFile.nameWithoutExtension)
+                                .setUserRating(HeartRating(false))
+                                .setExtras(Bundle().apply {
+                                    it.getLongOrNullIfThrow(addDateColumn)?.let { date ->
+                                        putLong(EXTRA_ADD_DATE, date)
+                                    }
+                                    it.getLongOrNullIfThrow(modifiedDateColumn)?.let { date ->
+                                        putLong(EXTRA_MODIFIED_DATE, date)
+                                    }
+                                    putString(EXTRA_FILE, path)
+                                })
+                                .build()
+                        )
+                        .build()
+                    idMap?.put(id, song)
+                    pathMap?.put(path, song)
+                    if (skip) continue
+                    songs.add(song)
+                    if (shouldLoadFilesystem) {
+                        (handleMediaFolder(folderPath, root!!) as MiscUtils.FileNodeImpl)
+                            .addSong(song, null)
+                    }
+                    if (shouldLoadFolders) {
+                        handleShallowMediaItem(song, null, parent!!.name, shallowRoot!!)
+                        var folder = parent
+                        while (folder != null) {
+                            folders!!.add(folder.absolutePath)
+                            folder = folder.parentFile
+                            if (folder != null && (folder.absolutePath == "/storage/emulated" ||
+                                        folder.absolutePath == "/storage")
+                            ) {
+                                folder = null
+                            }
+                        }
                     }
                 }
             }

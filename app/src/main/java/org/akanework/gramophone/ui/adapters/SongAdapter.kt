@@ -41,7 +41,6 @@ import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.getBooleanStrict
 import org.akanework.gramophone.logic.getFile
 import org.akanework.gramophone.logic.gramophoneApplication
-import org.akanework.gramophone.logic.requireMediaStoreId
 import org.akanework.gramophone.logic.setMediaItemsSeamlessly
 import org.akanework.gramophone.logic.ui.MyRecyclerView
 import org.akanework.gramophone.ui.MediaControllerViewModel
@@ -285,7 +284,7 @@ class SongAdapter(
                     CoroutineScope(Dispatchers.Default).launch {
                         val res = ItemManipulator.deleteSongs(
                             mainActivity,
-                            listOf(item.getFile()!! to item.requireMediaStoreId())
+                            listOf(item.getFile()!! to item.localConfiguration!!.uri)
                         )
                         if (res != null) {
                             withContext(Dispatchers.Main) {
