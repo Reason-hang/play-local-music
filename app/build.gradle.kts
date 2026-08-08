@@ -105,8 +105,8 @@ android {
         applicationId = appIdOverride ?: "org.akanework.gramophone"
         minSdk = 23
         targetSdk = 36
-        versionCode = 26
-        versionName = "1.3.2"
+        versionCode = 27
+        versionName = "1.3.3"
         if (releaseType != "Release" || vnos != null) {
             // by default the git commit hash is appended for non-release builds, however overrides
             // will apply unconditionally
@@ -219,7 +219,10 @@ android {
             matchingFallbacks += "release"
         }
         debug {
-            isPseudoLocalesEnabled = true
+            // This is the user-installable SelfBuilt variant, not a developer build.
+            // Keep its package stable so it updates the 1.3.2 APK already on the device.
+            isDebuggable = false
+            isPseudoLocalesEnabled = false
             applicationIdSuffix = ".debug"
         }
         forEach {
@@ -231,24 +234,6 @@ android {
                     "release2" else "release"]
             }
             it.isCrunchPngs = false // for reproducible builds TODO how much size impact does this have? where are the pngs from? can we use webp?
-        }
-    }
-
-    sourceSets {
-        getByName("debug") {
-            // This does NOT remove src/debug/ source sets, hence "debug" is a superset of "userdebug"
-            // TODO it seems this broke and that caused Reflections to crash
-            java.directories += "src/userdebug/java"
-            kotlin.directories += "src/userdebug/kotlin"
-            resources.directories += "src/userdebug/resources"
-            res.directories += "src/userdebug/res"
-            assets.directories += "src/userdebug/assets"
-            aidl.directories += "src/userdebug/aidl"
-            renderscript.directories += "src/userdebug/renderscript"
-            baselineProfiles.directories += "src/userdebug/baselineProfiles"
-            jniLibs.directories += "src/userdebug/jniLibs"
-            shaders.directories += "src/userdebug/shaders"
-            mlModels.directories += "src/userdebug/mlModels"
         }
     }
 
@@ -353,11 +338,9 @@ dependencies {
     implementation("androidx.profileinstaller:profileinstaller:1.4.1")
     "baselineProfile"(project(":baselineprofile"))
     // --- below does not apply to release builds ---
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.17-beta-2")
     "userdebugImplementation"(kotlin("reflect", kotlinVersion)) // who thought String.invoke() is a good idea?????
-    debugImplementation(kotlin("reflect", kotlinVersion))
 }
 
 fun String.runCommand(
