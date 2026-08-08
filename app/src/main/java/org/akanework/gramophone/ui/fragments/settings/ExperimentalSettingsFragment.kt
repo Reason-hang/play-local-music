@@ -17,24 +17,13 @@
 
 package org.akanework.gramophone.ui.fragments.settings
 
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import androidx.core.content.FileProvider
-import androidx.media3.common.util.Log
 import androidx.preference.Preference
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withContext
 import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.utils.Flags
 import org.akanework.gramophone.ui.fragments.BasePreferenceFragment
 import org.akanework.gramophone.ui.fragments.BaseSettingsActivity
-import java.io.File
-import java.nio.charset.Charset
 
 class ExperimentalSettingsActivity : BaseSettingsActivity(
     R.string.settings_experimental_settings,
@@ -58,46 +47,6 @@ class ExperimentalSettingsFragment : BasePreferenceFragment() {
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
         if (preference.key == "crash" && BuildConfig.DEBUG) {
             throw IllegalArgumentException("I crashed your app >:)", e)
-        } else if (preference.key == "self_log") {
-            Log.w("Gramophone", "Exporting logs...")
-            CoroutineScope(Dispatchers.IO).launch {
-                val p = ProcessBuilder()
-                    .command("logcat", "-dball")
-                    .start()
-                val stdout = p.inputStream.readBytes().toString(Charset.defaultCharset())
-                val stderr = p.errorStream.readBytes().toString(Charset.defaultCharset())
-                runInterruptible {
-                    p.waitFor()
-                }
-                val selfLogDir = File(requireContext().cacheDir, "SelfLog")
-                val f = File(
-                    selfLogDir.also { it.mkdirs() },
-                    "GramophoneLog${System.currentTimeMillis()}.txt"
-                )
-                f.writeText(
-                    "SDK: ${Build.VERSION.SDK_INT}\nDevice: ${Build.BRAND} ${Build.DEVICE} " +
-                            "(${Build.MANUFACTURER} ${Build.PRODUCT} ${Build.MODEL})\nVersion: " +
-                            "${BuildConfig.MY_VERSION_NAME} ${BuildConfig.RELEASE_TYPE} (${context?.packageName})" +
-                            "\n$stdout\n$stderr"
-                )
-                withContext(Dispatchers.Main) {
-                    val sendIntent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TITLE, "Gramophone Logs")
-                        putExtra(
-                            Intent.EXTRA_STREAM,
-                            FileProvider.getUriForFile(
-                                requireContext(),
-                                "${requireContext().packageName}.fileProvider",
-                                f
-                            )
-                        )
-                        type = "text/plain"
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    startActivity(shareIntent)
-                }
-            }
         }
         return super.onPreferenceTreeClick(preference)
     }

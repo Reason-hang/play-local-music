@@ -27,6 +27,12 @@ class Mp4AacSupportTest {
     }
 
     @Test
+    fun identifiesVideoTrackForFullPlayerRendering() {
+        assertTrue(Reader.hasVideoTrack(listOf("video/hevc", MediaFormat.MIMETYPE_AUDIO_AAC)))
+        assertFalse(Reader.hasVideoTrack(listOf(MediaFormat.MIMETYPE_AUDIO_AAC)))
+    }
+
+    @Test
     fun acceptsMp4ExtensionWhenMediaStoreMimeTypeIsMissing() {
         assertTrue(
             Reader.isSupportedMp4Aac(

@@ -57,6 +57,10 @@ class MainSettingsFragment : BasePreferenceFragment() {
             "experimental" -> {
                 startActivity(ExperimentalSettingsActivity::class.java)
             }
+
+            "diagnostics" -> {
+                startActivity(DiagnosticsSettingsActivity::class.java)
+            }
         }
         return super.onPreferenceTreeClick(preference)
     }

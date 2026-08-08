@@ -88,7 +88,16 @@ class GramophoneRenderFactory(
         allowedVideoJoiningTimeMs: Long,
         out: java.util.ArrayList<Renderer>
     ) {
-        // empty
+        super.buildVideoRenderers(
+            context,
+            extensionRendererMode,
+            mediaCodecSelector,
+            enableDecoderFallback,
+            eventHandler,
+            eventListener,
+            allowedVideoJoiningTimeMs,
+            out
+        )
     }
 
     override fun buildImageRenderers(context: Context, out: java.util.ArrayList<Renderer>) {

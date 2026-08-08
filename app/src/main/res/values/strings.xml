@@ -241,6 +241,18 @@
     <string name="settings_title_bold_summary">Use bold title for full player</string>
     <!-- Settings category about experimental features. Title -->
     <string name="settings_experimental_settings">Experimental</string>
+    <string name="settings_diagnostics">Diagnostics and logs</string>
+    <string name="settings_diagnostics_summary">View local crash records and export a diagnostic package</string>
+    <string name="diagnostics_recent_crashes">Recent crashes</string>
+    <string name="diagnostics_actions">Actions</string>
+    <string name="diagnostics_no_crash">No local crash records</string>
+    <string name="diagnostics_view_crash">View crash summary</string>
+    <string name="diagnostics_export">Export diagnostic package</string>
+    <string name="diagnostics_export_summary">Creates a local ZIP only after you tap this action</string>
+    <string name="diagnostics_export_failed">Unable to export diagnostics</string>
+    <string name="diagnostics_clear">Clear local records</string>
+    <string name="diagnostics_clear_summary">Deletes diagnostic records from this device</string>
+    <string name="diagnostics_clear_confirm">Delete all local diagnostic records? This cannot be undone.</string>
     <!-- Settings category about experimental features. Subtext -->
     <string name="settings_experimental_settings_summary">Testing features, misc</string>
     <!-- Toggle which makes color detection for album cover based color use more CPU to detect the

@@ -80,6 +80,7 @@ import androidx.media3.common.util.Log
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
+import androidx.media3.ui.PlayerView
 import androidx.preference.PreferenceManager
 import coil3.asDrawable
 import coil3.dispose
@@ -249,6 +250,7 @@ class FullBottomSheet
             }
         }
     private val bottomSheetFullCover: TransformableImageView
+    private val bottomSheetVideoView: PlayerView
     private val bottomSheetFullTitle: TextView
     private val bottomSheetFullSubtitle: TextView
     private val bottomSheetFullControllerButton: MaterialButton
@@ -276,6 +278,7 @@ class FullBottomSheet
         inflate(context, R.layout.full_player, this)
         bottomSheetFullCoverFrame = findViewById(R.id.album_cover_frame)
         bottomSheetFullCover = findViewById(R.id.full_sheet_cover)
+        bottomSheetVideoView = findViewById(R.id.full_sheet_video)
         bottomSheetFullTitle = findViewById(R.id.full_song_name)
         bottomSheetFullSubtitle = findViewById(R.id.full_song_artist)
         bottomSheetFullPreviousButton = findViewById(R.id.sheet_previous_song)
@@ -580,6 +583,7 @@ class FullBottomSheet
         bottomSheetFullSlider.trackInactiveTintList = ColorStateList.valueOf(colorContrastFainted)
 
         activity.controllerViewModel.addRecreationalPlayerListener(activity.lifecycle, this) {
+            bottomSheetVideoView.player = instance
             firstTime = true
             updateTimer()
             onRepeatModeChanged(instance?.repeatMode ?: Player.REPEAT_MODE_OFF)
@@ -624,6 +628,11 @@ class FullBottomSheet
             ),
         )
         bottomSheetFullSeekBar.progressTintList = ColorStateList.valueOf(colorPrimary)
+    }
+
+    override fun onDetachedFromWindow() {
+        bottomSheetVideoView.player = null
+        super.onDetachedFromWindow()
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -1426,6 +1435,10 @@ class FullBottomSheet
         reason: Int
     ) {
         if (instance?.mediaItemCount != 0) {
+            val isVideo = mediaItem?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO
+            bottomSheetVideoView.visibility = if (isVideo) VISIBLE else GONE
+            bottomSheetFullCover.visibility = if (isVideo) GONE else VISIBLE
+            bottomSheetVideoView.player = instance
             bottomSheetFullCover.dispose()
             bottomSheetFullCover.loadNoPlaceholder(mediaItem?.mediaMetadata?.artworkUri) {
                 scale(Scale.FILL)
@@ -1446,6 +1459,9 @@ class FullBottomSheet
             )
             updateDuration()
         } else {
+            bottomSheetVideoView.visibility = GONE
+            bottomSheetFullCover.visibility = VISIBLE
+            bottomSheetVideoView.player = null
             bottomSheetFullCover.dispose()
         }
     }

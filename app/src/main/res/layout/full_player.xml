@@ -93,6 +93,17 @@
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/ic_default_cover" />
 
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/full_sheet_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:contentDescription="@string/dialog_album"
+            android:visibility="gone"
+            app:resize_mode="fit"
+            app:show_buffering="when_playing"
+            app:use_controller="false" />
+
     </com.google.android.material.card.MaterialCardView>
 
     <!-- TODO can we get rid of weight? does that even do anything in a ConstraintLayout parent? -->

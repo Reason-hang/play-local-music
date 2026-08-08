@@ -67,11 +67,6 @@
         <meta-data
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc"/>
-        <activity
-            android:name=".logic.ui.BugHandlerActivity"
-            android:exported="false"
-            android:taskAffinity="org.akanework.gramophone.crashLog" />
-
         <service
             android:name=".logic.GramophonePlaybackService"
             android:exported="true"
@@ -307,6 +302,9 @@
 
         <activity
             android:name=".ui.fragments.settings.ExperimentalSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.fragments.settings.DiagnosticsSettingsActivity"
             android:exported="false" />
 
         <activity

@@ -39,12 +39,6 @@
             app:iconSpaceReserved="false"
             app:isPreferenceVisible="false" />
 
-        <Preference
-            android:key="self_log"
-            android:layout="@layout/preference_basic"
-            android:title="@string/settings_export_logs"
-            app:iconSpaceReserved="false" />
-
         <ListPreference
             android:defaultValue="0"
             android:entries="@array/offload_switch"

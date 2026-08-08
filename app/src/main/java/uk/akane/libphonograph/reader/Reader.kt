@@ -135,10 +135,7 @@ internal object Reader {
         MediaStore.Video.Media.DATE_MODIFIED
     )
 
-    /**
-     * The product scope is deliberately limited to MP4 containers with an AAC audio track.
-     * A video renderer is not installed, so no MP4 picture track is surfaced to the user.
-     */
+    /** The first release scope accepts MP4 containers with an AAC audio track. */
     internal fun isSupportedMp4Aac(
         containerMimeType: String?,
         fileName: String,
@@ -152,29 +149,36 @@ internal object Reader {
         }
     }
 
-    private fun hasAacAudioTrack(
+    internal fun hasVideoTrack(trackMimeTypes: Iterable<String?>): Boolean =
+        trackMimeTypes.any { it?.startsWith("video/", ignoreCase = true) == true }
+
+    private fun inspectMp4Tracks(
         context: Context,
         uri: Uri,
         containerMimeType: String?,
         fileName: String
-    ): Boolean {
+    ): Mp4TrackInfo? {
         val extractor = MediaExtractor()
         return try {
             extractor.setDataSource(context, uri, null)
-            isSupportedMp4Aac(
-                containerMimeType,
-                fileName,
+            val trackMimeTypes =
                 (0 until extractor.trackCount).map { index ->
                     extractor.getTrackFormat(index).getString(MediaFormat.KEY_MIME)
                 }
-            )
+            if (!isSupportedMp4Aac(
+                containerMimeType,
+                fileName,
+                trackMimeTypes
+            )) null else Mp4TrackInfo(hasVideoTrack(trackMimeTypes))
         } catch (e: Exception) {
             Log.w(TAG, "Unable to inspect local MP4 audio track", e)
-            false
+            null
         } finally {
             extractor.release()
         }
     }
+
+    private data class Mp4TrackInfo(val hasVideo: Boolean)
 
     private fun isBlacklistedByFolder(
         pathFile: File,
@@ -629,7 +633,7 @@ internal object Reader {
                     val fileName = it.getString(fileNameColumn) ?: pathFile.name
                     val mimeType = it.getStringOrNull(mimeTypeColumn)
                     val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
-                    if (!hasAacAudioTrack(context, uri, mimeType, fileName)) continue
+                    val mp4TrackInfo = inspectMp4Tracks(context, uri, mimeType, fileName) ?: continue
 
                     val song = MediaItem.Builder()
                         .setUri(uri)
@@ -639,7 +643,10 @@ internal object Reader {
                             MediaMetadata.Builder()
                                 .setIsBrowsable(false)
                                 .setIsPlayable(true)
-                                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+                                .setMediaType(
+                                    if (mp4TrackInfo.hasVideo) MediaMetadata.MEDIA_TYPE_VIDEO
+                                    else MediaMetadata.MEDIA_TYPE_MUSIC
+                                )
                                 .setDurationMs(duration)
                                 .setTitle(it.getString(titleColumn) ?: pathFile.nameWithoutExtension)
                                 .setUserRating(HeartRating(false))

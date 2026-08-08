@@ -20,7 +20,6 @@ package org.akanework.gramophone.logic
 import android.annotation.SuppressLint
 import android.app.Application
 import android.app.NotificationManager
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Debug
@@ -53,7 +52,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
-import org.akanework.gramophone.logic.ui.BugHandlerActivity
+import org.akanework.gramophone.logic.diagnostics.DiagnosticStore
 import org.akanework.gramophone.logic.utils.CoilArtPipeline
 import org.akanework.gramophone.ui.LyricWidgetProvider
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -62,7 +61,6 @@ import org.nift4.gramophone.hificore.UacManager
 import uk.akane.libphonograph.reader.FlowReader
 import java.io.File
 import java.io.IOException
-import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.milliseconds
 
 class GramophoneApplication : Application(), SingletonImageLoader.Factory,
@@ -71,6 +69,8 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
     companion object {
         private const val TAG = "GramophoneApplication"
     }
+
+    private val platformUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     init {
         @SuppressLint("DefaultUncaughtExceptionDelegation")
@@ -114,6 +114,7 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
 
     override fun onCreate() {
         super.onCreate()
+        DiagnosticStore.recordEvent(this, "application", "started")
         // disk read and write on first launch, but unavoidable as threads would race setDefaultNightMode
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val themeMode = prefs.getString("theme_mode", "0")
@@ -377,18 +378,11 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        // TODO convert to notification that opens BugHandlerActivity on click, and let JVM
-        //  go through the normal exception process (to get stats from play). disadvantage: we can't
-        //  cheat the statistic that way
         val exceptionMessage = Log.getThrowableString(e)
-        val threadName = Thread.currentThread().name
+        val threadName = t.name
         Log.e(TAG, "Error on thread $threadName:\n $exceptionMessage")
-        val intent = Intent(this, BugHandlerActivity::class.java)
-        intent.putExtra("exception_message", exceptionMessage)
-        intent.putExtra("thread", threadName)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        exitProcess(10)
+        DiagnosticStore.recordCrash(this, threadName, e)
+        platformUncaughtExceptionHandler?.uncaughtException(t, e)
     }
 
     private fun isAlpsBoostFwkPresent(): Boolean {

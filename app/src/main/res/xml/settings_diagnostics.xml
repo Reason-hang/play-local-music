@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="diagnostics_crashes"
+        android:layout="@layout/preference_category_md"
+        android:title="@string/diagnostics_recent_crashes" />
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_md"
+        android:title="@string/diagnostics_actions">
+
+        <Preference
+            android:key="diagnostics_export"
+            android:layout="@layout/preference_basic"
+            android:summary="@string/diagnostics_export_summary"
+            android:title="@string/diagnostics_export"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="diagnostics_clear"
+            android:layout="@layout/preference_basic"
+            android:summary="@string/diagnostics_clear_summary"
+            android:title="@string/diagnostics_clear"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

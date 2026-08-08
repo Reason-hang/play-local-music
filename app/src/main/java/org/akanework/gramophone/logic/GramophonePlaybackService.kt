@@ -65,6 +65,7 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.BitmapLoader
+import androidx.media3.common.util.ExperimentalApi
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.Util
 import androidx.media3.common.util.Util.isBitmapFactorySupportedMimeType
@@ -126,6 +127,7 @@ import org.akanework.gramophone.logic.utils.AudioTrackInfo
 import org.akanework.gramophone.logic.utils.BtCodecInfo
 import org.akanework.gramophone.logic.utils.CircularShuffleOrder
 import org.akanework.gramophone.logic.utils.Flags
+import org.akanework.gramophone.logic.diagnostics.DiagnosticStore
 import org.akanework.gramophone.logic.utils.LastPlayedManager
 import org.akanework.gramophone.logic.utils.LrcUtils.LrcParserOptions
 import org.akanework.gramophone.logic.utils.LrcUtils.extractAndParseLyrics
@@ -312,6 +314,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         }
     }
 
+    @ExperimentalApi
     override fun onCreate() {
         Log.i(TAG, "+onCreate()")
         super.onCreate()
@@ -703,19 +706,19 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     ): ListenableFuture<SessionResult> {
         if (rating !is HeartRating) {
             return Futures.immediateFuture(SessionResult(
-                SessionResult.RESULT_ERROR_BAD_VALUE))
+                SessionError.ERROR_BAD_VALUE))
         }
         val completion = SettableFuture.create<SessionResult>()
         lifecycleScope.launch(Dispatchers.Default) {
             val item = gramophoneApplication.reader.songListFlow.map {
                 it.find { s -> s.mediaId == mediaId } }.first()
             if (item == null) {
-                completion.set(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+                completion.set(SessionResult(SessionError.ERROR_BAD_VALUE))
                 return@launch
             }
             val song = Entry.ofMediaItem(item)
             if (song == null) {
-                completion.set(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+                completion.set(SessionResult(SessionError.ERROR_BAD_VALUE))
                 return@launch
             }
             val uriIn = gramophoneApplication.reader.playlistListFlow.map { it.find { p ->
@@ -1481,7 +1484,14 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     }
 
     override fun onPlayerError(error: PlaybackException) {
-        // TODO
+        DiagnosticStore.recordEvent(
+            this,
+            module = "player",
+            event = "playback_error",
+            level = "ERROR",
+            errorCode = error.errorCodeName,
+            details = mapOf("message" to (error.message ?: ""))
+        )
     }
 
     override fun onDeviceInfoChanged(deviceInfo: DeviceInfo) {
