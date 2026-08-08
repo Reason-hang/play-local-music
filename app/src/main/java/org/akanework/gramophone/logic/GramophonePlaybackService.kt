@@ -426,6 +426,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
                     })
             )
                 .experimentalSetDynamicSchedulingEnabled(false)
+                .setMaxSeekToPreviousPositionMs(Long.MAX_VALUE)
                 .setWakeMode(C.WAKE_MODE_LOCAL)
                 .setAudioAttributes(
                     AudioAttributes

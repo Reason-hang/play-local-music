@@ -2,7 +2,7 @@
 
 本地听歌是基于 `FoedusProgramme/Gramophone` 定制的离线 Android 本地媒体播放器，面向红米 K80 Pro、HyperOS 和 Android 16。它沿用成熟的 Media3、MediaSession 和前台媒体服务架构，重点支持本地 MP3，以及 MP4 容器中的 AAC 音轨与完整视频画面。
 
-当前交付为可安装的 SelfBuilt Debug APK：`1.3.1.c5886f9`（`versionCode 25`）。正式 Release 变体受上游 Media3 的 Release 编译依赖问题阻断，详见[验证记录](./docs/05-测试与验收/01-验证记录.md)；不会把 Debug APK 误标为 Release。
+当前交付版本为 `1.3.2`（`versionCode 26`）的 SelfBuilt Debug APK。正式 Release 变体受上游 Media3 的 Release 编译依赖问题阻断，详见[验证记录](./docs/05-测试与验收/01-验证记录.md)；不会把 Debug APK 误标为 Release。
 
 ## 目录
 
@@ -16,6 +16,8 @@
 
 - MediaStore 扫描本地 MP3 和 MP4+A​​AC；有视频轨的 MP4 在完整播放器显示画面。
 - MP3/MP4 共用播放队列、歌单、后台播放、锁屏通知和蓝牙媒体控制。
+- 队列存在上一项时，任意入口的“上一首”均直接切换上一项；只有队列第一项才重播本项。
+- 播放速度使用 `0.75x`、`1x`、`1.3x`、`1.5x`、`1.7x`、`2x` 六档单选预设；默认不锁定速度和音高。
 - “设置 → 诊断与日志”可查看私有崩溃摘要、主动导出 ZIP、清除记录；没有强制邮件弹窗。
 - 用户可见中文语言环境使用简体中文；不重做上游页面结构。
 

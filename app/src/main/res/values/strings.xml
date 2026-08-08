@@ -332,6 +332,14 @@
     <string name="timer">Sleep timer</string>
     <!-- Tooltip and dialog title for playback speed in full player -->
     <string name="playback_speed">Playback speed</string>
+    <string-array name="playback_speed_presets">
+        <item>0.75x</item>
+        <item>1x</item>
+        <item>1.3x</item>
+        <item>1.5x</item>
+        <item>1.7x</item>
+        <item>2x</item>
+    </string-array>
     <!-- Used in playback speed dialog to control speed / tempo, next to slider -->
     <string name="tempo">Tempo</string>
     <!-- Used in playback speed dialog to control pitch, next to slider -->

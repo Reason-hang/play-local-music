@@ -46,6 +46,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -98,6 +99,7 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.slider.Slider
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -726,26 +728,19 @@ class FullBottomSheet
     private fun showPlaybackSpeedDialog() {
         val context = wrappedContext ?: context
         val initialPlaybackParameters = instance!!.playbackParameters
-        val wantsToBeLocked = prefs.getBoolean("playback_tempo_pitch_locked", true)
+        val wantsToBeLocked = prefs.getBoolean("playback_tempo_pitch_locked", false)
         val isLocked =
             initialPlaybackParameters.pitch == initialPlaybackParameters.speed && wantsToBeLocked
 
-        val tempoSlider = Slider(context).apply {
-            valueFrom = 0.25f
-            valueTo = 4.0f
-            stepSize = 0.01f
-            value = initialPlaybackParameters.speed.coerceIn(0.25f, 4.0f)
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { layoutParams = it }
-        }
-
+        val playbackSpeeds = floatArrayOf(0.75f, 1f, 1.3f, 1.5f, 1.7f, 2f)
+        val playbackSpeedLabels = context.resources.getStringArray(R.array.playback_speed_presets)
+        var selectedSpeed = initialPlaybackParameters.speed
+        val playbackSpeedRadioIds = IntArray(playbackSpeeds.size)
         val tempoText = TextView(context).apply {
             text = context.getString(
                 R.string.tempo_pitch_value,
                 context.getString(R.string.tempo),
-                tempoSlider.value
+                initialPlaybackParameters.speed
             )
             gravity = Gravity.CENTER
             textSize = 16f
@@ -753,6 +748,17 @@ class FullBottomSheet
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).also { layoutParams = it }
+        }
+
+        val tempoOptions = RadioGroup(context).apply {
+            orientation = RadioGroup.VERTICAL
+            playbackSpeeds.forEachIndexed { index, speed ->
+                addView(MaterialRadioButton(context).apply {
+                    id = View.generateViewId().also { playbackSpeedRadioIds[index] = it }
+                    text = playbackSpeedLabels[index]
+                    isChecked = initialPlaybackParameters.speed == speed
+                })
+            }
         }
 
         val pitchSlider = Slider(context).apply {
@@ -799,25 +805,10 @@ class FullBottomSheet
                 48.dpToPx(context), 0
             )
             addView(tempoText)
-            addView(tempoSlider)
+            addView(tempoOptions)
             addView(pitchText)
             addView(pitchSlider)
             addView(lockCheckbox)
-        }
-
-        tempoSlider.addOnChangeListener { _, value, fromUser ->
-            tempoText.text = context.getString(
-                R.string.tempo_pitch_value,
-                context.getString(R.string.tempo),
-                value
-            )
-            if (fromUser) {
-                if (lockCheckbox.isChecked) {
-                    pitchSlider.value = value
-                }
-                instance?.playbackParameters =
-                    PlaybackParameters(tempoSlider.value, pitchSlider.value)
-            }
         }
 
         pitchSlider.addOnChangeListener { _, value, fromUser ->
@@ -828,17 +819,33 @@ class FullBottomSheet
             )
             if (fromUser) {
                 instance?.playbackParameters =
-                    PlaybackParameters(tempoSlider.value, pitchSlider.value)
+                    PlaybackParameters(selectedSpeed, pitchSlider.value)
             }
+        }
+
+        tempoOptions.setOnCheckedChangeListener { _, checkedId ->
+            val index = playbackSpeedRadioIds.indexOf(checkedId)
+            if (index == -1) return@setOnCheckedChangeListener
+            selectedSpeed = playbackSpeeds[index]
+            if (lockCheckbox.isChecked) {
+                pitchSlider.value = selectedSpeed
+            }
+            tempoText.text = context.getString(
+                R.string.tempo_pitch_value,
+                context.getString(R.string.tempo),
+                selectedSpeed
+            )
+            instance?.playbackParameters =
+                PlaybackParameters(selectedSpeed, pitchSlider.value)
         }
 
         lockCheckbox.setOnCheckedChangeListener { _, isChecked ->
             pitchSlider.isEnabled = !isChecked
             pitchText.isEnabled = !isChecked
             if (isChecked) {
-                pitchSlider.value = tempoSlider.value
+                pitchSlider.value = selectedSpeed
                 instance?.playbackParameters =
-                    PlaybackParameters(tempoSlider.value, pitchSlider.value)
+                    PlaybackParameters(selectedSpeed, pitchSlider.value)
             }
         }
 
@@ -860,7 +867,7 @@ class FullBottomSheet
             }
             .setNeutralButton(R.string.reset) { _, _ ->
                 prefs.edit {
-                    putBoolean("playback_tempo_pitch_locked", true)
+                    putBoolean("playback_tempo_pitch_locked", false)
                 }
                 instance?.playbackParameters = PlaybackParameters(1f, 1f)
             }

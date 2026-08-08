@@ -399,6 +399,14 @@
     <string name="timer_expiry_eos">睡眠定时器将在 %s 歌曲播放结束后暂停音乐</string>
     <string name="timer_expiry_end_of_this_song">睡眠定时器将在这首歌曲结束后暂停音乐</string>
     <string name="playback_speed">播放速度</string>
+    <string-array name="playback_speed_presets">
+        <item>0.75 倍</item>
+        <item>1 倍</item>
+        <item>1.3 倍</item>
+        <item>1.5 倍</item>
+        <item>1.7 倍</item>
+        <item>2 倍</item>
+    </string-array>
     <string name="tempo">速度</string>
     <string name="lock_tempo_pitch">锁定速度和音高</string>
     <string name="reset">重置</string>
