@@ -29,7 +29,11 @@ android {
     val appIdOverride = resolveProperties("appIdOverride")
     val vnos = resolveProperties("version" + "NameSuffixOverride")
 
-    val myVersionName = "." + (vnos ?: "git rev-parse --short=7 HEAD".runCommand(workingDir = rootDir))
+    val buildVersionSuffix = when {
+        vnos != null -> "." + vnos.removePrefix(".")
+        releaseType == "SelfBuilt" || releaseType == "Release" -> ""
+        else -> "." + "git rev-parse --short=7 HEAD".runCommand(workingDir = rootDir)
+    }
     if (releaseType.contains("\"")) {
         throw IllegalArgumentException("releaseType must not contain \"")
     }
@@ -105,17 +109,15 @@ android {
         applicationId = appIdOverride ?: "org.akanework.gramophone"
         minSdk = 23
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.4.1"
-        if (releaseType != "Release" || vnos != null) {
-            // by default the git commit hash is appended for non-release builds, however overrides
-            // will apply unconditionally
-            versionNameSuffix = vnos ?: myVersionName
+        versionCode = 30
+        versionName = "1.4.2"
+        if (buildVersionSuffix.isNotEmpty()) {
+            versionNameSuffix = buildVersionSuffix
         }
         buildConfigField(
             "String",
             "MY_VERSION_NAME",
-            "\"$versionName$myVersionName\""
+            "\"$versionName$buildVersionSuffix\""
         )
         buildConfigField(
             "String",

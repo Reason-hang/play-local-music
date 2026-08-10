@@ -40,4 +40,26 @@ class DiagnosticStoreTest {
         assertTrue(contents.contains("<redacted-path>"))
         assertFalse(contents.contains("/storage/emulated/0/Music/private.mp4"))
     }
+
+    @Test
+    fun copiedSummaryIncludesSanitizedRecentPlaybackEvents() {
+        DiagnosticStore.recordEvent(
+            context,
+            module = "player",
+            event = "playback_state",
+            details = mapOf(
+                "mimeType" to "video/hevc",
+                "message" to "failed at /storage/emulated/0/Movies/private.mp4 from content://media/external/video/media/42"
+            )
+        )
+
+        val summary = DiagnosticStore.copySummary(context)
+
+        assertTrue(summary.contains("playback_state"))
+        assertTrue(summary.contains("video/hevc"))
+        assertTrue(summary.contains("<redacted-path>"))
+        assertTrue(summary.contains("<redacted-uri>"))
+        assertFalse(summary.contains("/storage/emulated/0/Movies/private.mp4"))
+        assertFalse(summary.contains("content://media/external/video/media/42"))
+    }
 }

@@ -30,7 +30,9 @@ object DiagnosticStore {
     private const val MAX_CRASH_FILES = 20
     private const val MAX_EVENT_BYTES = 128 * 1024
     private const val MAX_CRASH_BYTES = 64 * 1024
+    private const val MAX_SUMMARY_EVENT_CHARS = 1024
     private val localPathRegex = Regex("/(?:storage|sdcard|data|mnt|Users)/[^\\s\\n]*")
+    private val contentUriRegex = Regex("content://[^\\s\\n\\\"\\\\]+")
 
     data class CrashRecord(val file: File, val timestamp: Long)
 
@@ -110,6 +112,12 @@ object DiagnosticStore {
             appendLine("latestCrash=${record.timestamp}")
             append(sanitize(readCrash(record)).take(12 * 1024))
         } ?: appendLine("latestCrash=none")
+        appendLine()
+        appendLine("recentEvents:")
+        val eventFile = File(diagnosticDirectory(context), EVENT_FILE)
+        eventFile.takeIf(File::exists)?.readLines()?.takeLast(20)?.forEach { line ->
+            appendLine(sanitize(line.replace("\\/", "/")).take(MAX_SUMMARY_EVENT_CHARS))
+        } ?: appendLine("none")
     }
 
     fun clear(context: Context) {
@@ -161,5 +169,8 @@ object DiagnosticStore {
         }
     }
 
-    private fun sanitize(value: String): String = localPathRegex.replace(value, "<redacted-path>")
+    private fun sanitize(value: String): String = contentUriRegex.replace(
+        localPathRegex.replace(value, "<redacted-path>"),
+        "<redacted-uri>"
+    )
 }

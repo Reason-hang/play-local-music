@@ -1252,6 +1252,17 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         playWhenReady: Boolean,
         reason: @Player.PlayWhenReadyChangeReason Int
     ) {
+        DiagnosticStore.recordEvent(
+            this,
+            module = "player",
+            event = "play_when_ready",
+            details = mapOf(
+                "playWhenReady" to playWhenReady.toString(),
+                "reason" to reason.toString(),
+                "mimeType" to (endedWorkaroundPlayer?.currentMediaItem
+                    ?.localConfiguration?.mimeType ?: "unknown")
+            )
+        )
         if (reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM) {
             this.endedWorkaroundPlayer?.exoPlayer?.pauseAtEndOfMediaItems = false
             mediaSession!!.broadcastCustomCommand(
@@ -1448,6 +1459,17 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     }
 
     override fun onPlaybackStateChanged(state: Int) {
+        DiagnosticStore.recordEvent(
+            this,
+            module = "player",
+            event = "playback_state",
+            details = mapOf(
+                "state" to state.toString(),
+                "playWhenReady" to (endedWorkaroundPlayer?.playWhenReady?.toString() ?: "unknown"),
+                "mimeType" to (endedWorkaroundPlayer?.currentMediaItem
+                    ?.localConfiguration?.mimeType ?: "unknown")
+            )
+        )
         if (state == Player.STATE_IDLE) {
             var changed = false
             if (afTrackFormat != null) {
@@ -1506,6 +1528,16 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        DiagnosticStore.recordEvent(
+            this,
+            module = "player",
+            event = "media_item_transition",
+            details = mapOf(
+                "reason" to reason.toString(),
+                "mimeType" to (mediaItem?.localConfiguration?.mimeType ?: "unknown"),
+                "mediaType" to (mediaItem?.mediaMetadata?.mediaType?.toString() ?: "unknown")
+            )
+        )
         if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT) {
             bitrate = null
             bitrateFetcher.launch {
