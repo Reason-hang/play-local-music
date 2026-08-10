@@ -79,6 +79,7 @@ class FlowReader(
     minSongLengthSecondsFlow: SharedFlow<Long>,
     blackListSetFlow: SharedFlow<Set<String>>,
     whiteListSetFlow: SharedFlow<Set<String>>,
+    hiddenMediaKeysFlow: SharedFlow<Set<String>>,
     shouldUseEnhancedCoverReadingFlow: SharedFlow<Boolean?>, // null means load if permission is granted
     recentlyAddedFilterSecondFlow: SharedFlow<Long?>, // null means don't generate recently added
 ) {
@@ -225,6 +226,7 @@ class FlowReader(
         minSongLengthSeconds: Long,
         blackListSet: Set<String>,
         whiteListSet: Set<String>,
+        hiddenMediaKeys: Set<String>,
         shouldUseEnhancedCoverReading: Boolean?
     ) =
         // TODO repeatUntilDoneWhenUnpaused makes no sense with non-cancelable
@@ -236,7 +238,8 @@ class FlowReader(
                     minSongLengthSeconds,
                     blackListSet,
                     whiteListSet,
-                    shouldUseEnhancedCoverReading
+                    shouldUseEnhancedCoverReading,
+                    hiddenMediaKeys = hiddenMediaKeys
                 )
             else ReaderResult.emptyReaderResult()
         } catch (e: IllegalArgumentException) {
@@ -284,24 +287,25 @@ class FlowReader(
                             .flatMapLatest { blackListSet ->
                                 whiteListSetFlow.distinctUntilChanged()
                                     .flatMapLatest { whiteListSet ->
-                                        mediaVersionFlow
-                                            .onEach { requireReplayCacheInvalidationManager().invalidate() }
-                                            .conflateAndBlockWhenPaused()
-                                            .flatMapLatest {
-                                                // manual refresh may for whatever reason
-                                                // run in background, but all others
-                                                // shouldn't trigger background runs
-                                                manualRefreshTrigger.mapLatest { _ ->
-                                                    repeatUntilDoneWhenUnpaused {
-                                                        maybeDoRead(
-                                                            context,
-                                                            minSongLengthSeconds,
-                                                            blackListSet,
-                                                            whiteListSet,
-                                                            shouldUseEnhancedCoverReading
-                                                        )
+                                        hiddenMediaKeysFlow.distinctUntilChanged()
+                                            .flatMapLatest { hiddenMediaKeys ->
+                                                mediaVersionFlow
+                                                    .onEach { requireReplayCacheInvalidationManager().invalidate() }
+                                                    .conflateAndBlockWhenPaused()
+                                                    .flatMapLatest {
+                                                        manualRefreshTrigger.mapLatest { _ ->
+                                                            repeatUntilDoneWhenUnpaused {
+                                                                maybeDoRead(
+                                                                    context,
+                                                                    minSongLengthSeconds,
+                                                                    blackListSet,
+                                                                    whiteListSet,
+                                                                    hiddenMediaKeys,
+                                                                    shouldUseEnhancedCoverReading
+                                                                )
+                                                            }
+                                                        }
                                                     }
-                                                }
                                             }
                                     }
                             }

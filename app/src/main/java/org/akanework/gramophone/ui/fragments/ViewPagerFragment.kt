@@ -30,6 +30,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import androidx.lifecycle.lifecycleScope
 import coil3.SingletonImageLoader
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -38,12 +39,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.collectLatest
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.clone
 import org.akanework.gramophone.logic.enableEdgeToEdgePaddingListener
@@ -51,7 +55,10 @@ import org.akanework.gramophone.logic.needsManualSnackBarInset
 import org.akanework.gramophone.logic.updateMargin
 import org.akanework.gramophone.logic.utils.SdScanner
 import org.akanework.gramophone.logic.setMediaItemsWithTitle
+import org.akanework.gramophone.logic.gramophoneApplication
+import org.akanework.gramophone.logic.library.LocalLibraryManager
 import org.akanework.gramophone.ui.MainActivity
+import org.akanework.gramophone.ui.LibraryManagementActivity
 import org.akanework.gramophone.ui.adapters.ViewPager2Adapter
 import org.akanework.gramophone.ui.components.PlayerBottomSheet
 import org.akanework.gramophone.ui.fragments.settings.MainSettingsActivity
@@ -78,8 +85,32 @@ class ViewPagerFragment : BaseFragment(true) {
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_viewpager, container, false)
         val tabLayout = rootView.findViewById<TabLayout>(R.id.tab_layout)
+        val filterScroll = rootView.findViewById<View>(R.id.library_filter_scroll)
+        val filterChips = rootView.findViewById<ChipGroup>(R.id.library_filter_chips)
         val topAppBar = rootView.findViewById<MaterialToolbar>(R.id.topAppBar)
         viewPager2 = rootView.findViewById(R.id.fragment_viewpager)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            requireContext().gramophoneApplication.localLibraryManager.state.collectLatest { state ->
+                filterChips.removeAllViews()
+                listOf(
+                    LocalLibraryManager.FILTER_ALL to "全部",
+                    LocalLibraryManager.FILTER_MP3 to "MP3",
+                    LocalLibraryManager.FILTER_MP4 to "MP4"
+                ).plus(state.categories.map { (name, keys) ->
+                    LocalLibraryManager.categoryFilter(name) to "$name（${keys.size}）"
+                }).forEach { (value, label) ->
+                    filterChips.addView(Chip(requireContext()).apply {
+                        text = label
+                        isCheckable = true
+                        isChecked = state.activeFilter == value
+                        setOnClickListener {
+                            requireContext().gramophoneApplication.localLibraryManager.selectFilter(value)
+                        }
+                    })
+                }
+            }
+        }
 
         appBarLayout = rootView.findViewById(R.id.appbarlayout)
         appBarLayout.enableEdgeToEdgePaddingListener()
@@ -159,6 +190,8 @@ class ViewPagerFragment : BaseFragment(true) {
                     activity.startActivity(Intent(activity, MainSettingsActivity::class.java))
                 }
 
+                R.id.library_management -> activity.startActivity(Intent(activity, LibraryManagementActivity::class.java))
+
                 R.id.shuffle -> {
                     ShortcutManagerCompat.reportShortcutUsed(requireContext(), "shuffle_all")
                     val controller = activity.getPlayer()
@@ -212,7 +245,9 @@ class ViewPagerFragment : BaseFragment(true) {
         }.attach()
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(p0: TabLayout.Tab?) {
-                // do nothing
+                filterScroll.visibility = if (p0?.position?.let {
+                        adapter.getItemId(it).toInt() == R.id.songs
+                    } == true) View.VISIBLE else View.GONE
             }
 
             override fun onTabUnselected(p0: TabLayout.Tab?) {
@@ -233,6 +268,7 @@ class ViewPagerFragment : BaseFragment(true) {
             tabLayout.visibility = View.VISIBLE
             viewPager2.isUserInputEnabled = true
         }
+        filterScroll.visibility = View.VISIBLE
 
         return rootView
     }

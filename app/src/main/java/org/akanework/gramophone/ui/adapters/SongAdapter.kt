@@ -91,6 +91,11 @@ class SongAdapter(
     fallbackContext = fallbackContext
 ), SharedPreferences.OnSharedPreferenceChangeListener {
 
+    override fun itemLayout(): Int = when (layoutType) {
+        LayoutType.GRID, LayoutType.COMPACT_GRID -> super.itemLayout()
+        else -> R.layout.adapter_song_list_card
+    }
+
     init {
         lateInit()
     }
@@ -202,6 +207,11 @@ class SongAdapter(
         list!!.second.forEachIndexed { i, item ->
             idToPosMap!![item.mediaId] = (idToPosMap!![item.mediaId] ?: emptyList()).plus(listOf(i))
         }
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.subTitle.visibility = View.GONE
     }
 
     override fun virtualTitleOf(item: MediaItem): String {

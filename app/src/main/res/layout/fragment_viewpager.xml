@@ -60,6 +60,21 @@
             app:tabTextAppearance="@style/TabTextAppearance"
             app:tabTextColor="?attr/colorOnSurfaceVariant" />
 
+        <HorizontalScrollView
+            android:id="@+id/library_filter_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:scrollbars="none">
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/library_filter_chips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                app:singleSelection="true" />
+        </HorizontalScrollView>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager2.widget.ViewPager2

@@ -10,11 +10,14 @@
 package org.akanework.gramophone.ui.fragments.settings
 
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +37,13 @@ class DiagnosticsSettingsActivity : BaseSettingsActivity(
 class DiagnosticsSettingsFragment : BasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_diagnostics, rootKey)
+        findPreference<Preference>("diagnostics_copy")?.setOnPreferenceClickListener {
+            val text = DiagnosticStore.copySummary(requireContext().applicationContext)
+            val clipboard = requireContext().getSystemService(ClipboardManager::class.java)
+            clipboard.setPrimaryClip(ClipData.newPlainText("本地听歌诊断摘要", text))
+            Toast.makeText(requireContext(), R.string.diagnostics_copy_done, Toast.LENGTH_SHORT).show()
+            true
+        }
         findPreference<Preference>("diagnostics_export")?.setOnPreferenceClickListener {
             exportDiagnostics()
             true
@@ -59,27 +69,31 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
     private fun refreshCrashRecords() {
         val category = findPreference<PreferenceCategory>("diagnostics_crashes") ?: return
         category.removeAll()
-        val records = DiagnosticStore.crashRecords(requireContext())
-        if (records.isEmpty()) {
-            category.addPreference(Preference(requireContext()).apply {
-                isSelectable = false
-                summary = getString(R.string.diagnostics_no_crash)
-            })
-            return
-        }
-        records.forEach { record ->
-            category.addPreference(Preference(requireContext()).apply {
-                title = DateFormat.getDateTimeInstance().format(Date(record.timestamp))
-                summary = getString(R.string.diagnostics_view_crash)
-                setOnPreferenceClickListener {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(title)
-                        .setMessage(DiagnosticStore.readCrash(record))
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
-                    true
-                }
-            })
+        viewLifecycleOwner.lifecycleScope.launch {
+            val records = withContext(Dispatchers.IO) {
+                DiagnosticStore.crashRecords(requireContext().applicationContext)
+            }
+            if (records.isEmpty()) {
+                category.addPreference(Preference(requireContext()).apply {
+                    isSelectable = false
+                    summary = getString(R.string.diagnostics_no_crash)
+                })
+                return@launch
+            }
+            records.forEach { record ->
+                category.addPreference(Preference(requireContext()).apply {
+                    title = DateFormat.getDateTimeInstance().format(Date(record.timestamp))
+                    summary = getString(R.string.diagnostics_view_crash)
+                    setOnPreferenceClickListener {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(title)
+                            .setMessage(DiagnosticStore.readCrash(record))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                        true
+                    }
+                })
+            }
         }
     }
 

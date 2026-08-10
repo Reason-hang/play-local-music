@@ -122,6 +122,9 @@
     <string name="diagnostics_no_crash">暂无本地崩溃记录</string>
     <string name="diagnostics_view_crash">查看崩溃摘要</string>
     <string name="diagnostics_export">导出诊断包</string>
+    <string name="diagnostics_copy">一键复制诊断摘要</string>
+    <string name="diagnostics_copy_summary">复制已脱敏的文本摘要，方便直接粘贴排查</string>
+    <string name="diagnostics_copy_done">诊断摘要已复制</string>
     <string name="diagnostics_export_summary">仅在你点击后生成本地 ZIP 文件</string>
     <string name="diagnostics_export_failed">无法导出诊断包</string>
     <string name="diagnostics_clear">清除本地记录</string>

@@ -326,7 +326,7 @@ abstract class BaseAdapter<T : Any>(
         return BaseDecorAdapter(this, pluralStr)
     }
 
-    override fun getItemViewType(position: Int): Int {
+    protected open fun itemLayout(): Int {
         return when (layoutType) {
             LayoutType.GRID, LayoutType.COMPACT_GRID -> R.layout.adapter_grid_card
             LayoutType.COMPACT_LIST -> R.layout.adapter_list_card
@@ -334,6 +334,8 @@ abstract class BaseAdapter<T : Any>(
             else -> throw IllegalArgumentException()
         }
     }
+
+    override fun getItemViewType(position: Int): Int = itemLayout()
 
     override fun onBindViewHolder(
         holder: ViewHolder,

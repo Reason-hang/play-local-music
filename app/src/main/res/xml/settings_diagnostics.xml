@@ -12,6 +12,13 @@
         android:title="@string/diagnostics_actions">
 
         <Preference
+            android:key="diagnostics_copy"
+            android:layout="@layout/preference_basic"
+            android:summary="@string/diagnostics_copy_summary"
+            android:title="@string/diagnostics_copy"
+            app:iconSpaceReserved="false" />
+
+        <Preference
             android:key="diagnostics_export"
             android:layout="@layout/preference_basic"
             android:summary="@string/diagnostics_export_summary"

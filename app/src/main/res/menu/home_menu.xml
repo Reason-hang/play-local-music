@@ -22,6 +22,10 @@
         android:title="@string/home_menu_refresh"
         app:showAsAction="never" />
     <item
+        android:id="@+id/library_management"
+        android:title="媒体库整理"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/settings"
         android:icon="@drawable/ic_settings"
         android:title="@string/home_menu_settings"

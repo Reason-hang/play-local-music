@@ -48,6 +48,7 @@ import kotlinx.coroutines.withContext
 import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.diagnostics.DiagnosticStore
+import org.akanework.gramophone.logic.library.LocalLibraryManager
 import org.akanework.gramophone.logic.utils.CoilArtPipeline
 import org.akanework.gramophone.ui.LyricWidgetProvider
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -103,6 +104,8 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
             Environment.DIRECTORY_RECORDINGS else "Recordings"
     )
     lateinit var reader: FlowReader
+        private set
+    lateinit var localLibraryManager: LocalLibraryManager
         private set
     lateinit var uacManager: UacManager
         private set
@@ -183,12 +186,14 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
             })
         }
         uacManager = UacManager(this)
+        localLibraryManager = LocalLibraryManager(this)
         reader = FlowReader(
             this,
             if (BuildConfig.DISABLE_MEDIA_STORE_FILTER) MutableStateFlow(0) else
                 minSongLengthSecondsFlow,
             blackListSetFlow,
             whiteListSetFlow,
+            localLibraryManager.hiddenMediaKeys,
             if (hasScopedStorageWithMediaTypes()) MutableStateFlow(null) else
                 shouldUseEnhancedCoverReadingFlow!!,
             recentlyAddedFilterSecondFlow

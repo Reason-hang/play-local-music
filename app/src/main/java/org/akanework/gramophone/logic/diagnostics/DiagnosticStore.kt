@@ -101,6 +101,17 @@ object DiagnosticStore {
 
     fun readCrash(record: CrashRecord): String = record.file.readText().take(MAX_CRASH_BYTES)
 
+    fun copySummary(context: Context): String = buildString {
+        appendLine("本地听歌诊断摘要")
+        appendLine("version=${BuildConfig.MY_VERSION_NAME}")
+        appendLine("device=${Build.BRAND} ${Build.MODEL}")
+        appendLine("sdk=${Build.VERSION.SDK_INT}")
+        crashRecords(context).firstOrNull()?.let { record ->
+            appendLine("latestCrash=${record.timestamp}")
+            append(sanitize(readCrash(record)).take(12 * 1024))
+        } ?: appendLine("latestCrash=none")
+    }
+
     fun clear(context: Context) {
         synchronized(this) {
             diagnosticDirectory(context).listFiles()?.forEach(File::delete)

@@ -272,7 +272,8 @@ internal object Reader {
         shouldLoadFolders: Boolean = true,
         shouldLoadFilesystem: Boolean = true,
         shouldLoadIdMap: Boolean = true,
-        shouldLoadPathMap: Boolean = true
+        shouldLoadPathMap: Boolean = true,
+        hiddenMediaKeys: Set<String> = emptySet()
     ): ReaderResult {
         if (!shouldLoadFilesystem && shouldUseEnhancedCoverReading != false) {
             throw IllegalArgumentException("Enhanced cover loading requires loading filesystem")
@@ -407,6 +408,7 @@ internal object Reader {
                 // We need to add blacklisted songs to idMap as they can be referenced by playlist
                 if (skip && idMap == null && pathMap == null) continue
                 val id = it.getLong(idColumn)
+                if (MediaIdentity.keys("MediaStore:$id", path).any(hiddenMediaKeys::contains)) continue
                 val title = it.getString(titleColumn) ?: path ?: it.getString(fileName)!!
                 val artist: String?
                 val hasNoMetadata: Boolean
@@ -630,6 +632,7 @@ internal object Reader {
                     if (skip && idMap == null && pathMap == null) continue
 
                     val id = it.getLong(idColumn)
+                    if (MediaIdentity.keys("MediaStore:$id", path).any(hiddenMediaKeys::contains)) continue
                     val fileName = it.getString(fileNameColumn) ?: pathFile.name
                     val mimeType = it.getStringOrNull(mimeTypeColumn)
                     val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)

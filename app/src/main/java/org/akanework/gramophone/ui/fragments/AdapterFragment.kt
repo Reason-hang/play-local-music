@@ -31,9 +31,13 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.combine
 import me.zhanghai.android.fastscroll.PopupTextProvider
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.enableEdgeToEdgePaddingListener
+import org.akanework.gramophone.logic.gramophoneApplication
+import org.akanework.gramophone.logic.getFile
+import org.akanework.gramophone.logic.library.LocalLibraryManager
 import org.akanework.gramophone.logic.ui.ItemHeightHelper
 import org.akanework.gramophone.logic.ui.MyRecyclerView
 import org.akanework.gramophone.ui.adapters.AlbumAdapter
@@ -117,7 +121,21 @@ class AdapterFragment : BaseFragment(null) {
         val id = arguments?.getInt("ID", -1)
         val qTitle = getQueueTitle()
         return when (id) {
-            R.id.songs -> SongAdapter(this, qTitle)
+            R.id.songs -> SongAdapter(this, qTitle, songList = combine(
+                requireContext().gramophoneApplication.reader.songListFlow,
+                requireContext().gramophoneApplication.localLibraryManager.state
+            ) { songs, library ->
+                when (library.activeFilter) {
+                    LocalLibraryManager.FILTER_MP3 -> songs.filter { it.getFile()?.extension.equals("mp3", true) }
+                    LocalLibraryManager.FILTER_MP4 -> songs.filter { it.getFile()?.extension.equals("mp4", true) }
+                    else -> library.activeFilter.removePrefix("category:").takeIf {
+                        library.activeFilter.startsWith("category:")
+                    }?.let { category ->
+                        val keys = library.categories[category].orEmpty()
+                        songs.filter { item -> keys.contains(requireContext().gramophoneApplication.localLibraryManager.categoryKey(item)) }
+                    } ?: songs
+                }
+            })
             R.id.albums -> AlbumAdapter(this, qTitle)
             R.id.artists -> ArtistAdapter(this)
             R.id.genres -> GenreAdapter(this)

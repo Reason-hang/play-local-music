@@ -20,6 +20,7 @@ package org.akanework.gramophone.ui.components
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -135,6 +136,7 @@ import org.akanework.gramophone.logic.utils.CalculationUtils
 import org.akanework.gramophone.logic.utils.ColorUtils
 import org.akanework.gramophone.logic.utils.Flags
 import org.akanework.gramophone.ui.MainActivity
+import org.akanework.gramophone.ui.VideoPlayerActivity
 import org.akanework.gramophone.ui.fragments.ArtistSubFragment
 import org.akanework.gramophone.ui.fragments.DetailDialogFragment
 import org.akanework.gramophone.ui.fragments.GeneralSubFragment
@@ -281,6 +283,9 @@ class FullBottomSheet
         bottomSheetFullCoverFrame = findViewById(R.id.album_cover_frame)
         bottomSheetFullCover = findViewById(R.id.full_sheet_cover)
         bottomSheetVideoView = findViewById(R.id.full_sheet_video)
+        bottomSheetVideoView.setOnClickListener {
+            context.startActivity(Intent(context, VideoPlayerActivity::class.java))
+        }
         bottomSheetFullTitle = findViewById(R.id.full_song_name)
         bottomSheetFullSubtitle = findViewById(R.id.full_song_artist)
         bottomSheetFullPreviousButton = findViewById(R.id.sheet_previous_song)

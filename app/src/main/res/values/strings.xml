@@ -248,6 +248,9 @@
     <string name="diagnostics_no_crash">No local crash records</string>
     <string name="diagnostics_view_crash">View crash summary</string>
     <string name="diagnostics_export">Export diagnostic package</string>
+    <string name="diagnostics_copy">Copy diagnostic summary</string>
+    <string name="diagnostics_copy_summary">Copies a privacy-filtered text summary to the clipboard</string>
+    <string name="diagnostics_copy_done">Diagnostic summary copied</string>
     <string name="diagnostics_export_summary">Creates a local ZIP only after you tap this action</string>
     <string name="diagnostics_export_failed">Unable to export diagnostics</string>
     <string name="diagnostics_clear">Clear local records</string>

@@ -80,6 +80,13 @@
         </service>
 
         <activity
+            android:name=".ui.LibraryManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.VideoPlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Gramophone" />
+        <activity
             android:name=".ui.MainActivity"
             android:theme="@style/Theme.Splash"
             android:exported="true"
