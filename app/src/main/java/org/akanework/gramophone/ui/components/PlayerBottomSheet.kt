@@ -405,4 +405,9 @@ class PlayerBottomSheet private constructor(
         super.onStop(owner)
         fullPlayer.onStop()
     }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        fullPlayer.onStart()
+    }
 }

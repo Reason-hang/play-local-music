@@ -102,6 +102,7 @@
             android:visibility="gone"
             app:resize_mode="fit"
             app:show_buffering="when_playing"
+            app:surface_type="texture_view"
             app:use_controller="false" />
 
     </com.google.android.material.card.MaterialCardView>

@@ -284,6 +284,9 @@ class FullBottomSheet
         bottomSheetFullCover = findViewById(R.id.full_sheet_cover)
         bottomSheetVideoView = findViewById(R.id.full_sheet_video)
         bottomSheetVideoView.setOnClickListener {
+            // Do not leave the embedded view holding a second output surface while the
+            // full-screen activity connects to the same service-owned player.
+            bottomSheetVideoView.player = null
             context.startActivity(Intent(context, VideoPlayerActivity::class.java))
         }
         bottomSheetFullTitle = findViewById(R.id.full_song_name)
@@ -880,8 +883,15 @@ class FullBottomSheet
     }
 
     fun onStop() {
+        bottomSheetVideoView.player = null
         pqs?.dismiss()
         runnableRunning = false
+    }
+
+    fun onStart() {
+        if (isVideoItem(instance?.currentMediaItem)) {
+            bottomSheetVideoView.player = instance
+        }
     }
 
     override fun dispatchApplyWindowInsets(platformInsets: WindowInsets): WindowInsets {
@@ -1447,7 +1457,7 @@ class FullBottomSheet
         reason: Int
     ) {
         if (instance?.mediaItemCount != 0) {
-            val isVideo = mediaItem?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO
+            val isVideo = isVideoItem(mediaItem)
             bottomSheetVideoView.visibility = if (isVideo) VISIBLE else GONE
             bottomSheetFullCover.visibility = if (isVideo) GONE else VISIBLE
             bottomSheetVideoView.player = instance
@@ -1487,6 +1497,10 @@ class FullBottomSheet
         }
         bottomSheetFavoriteButton.addOnCheckedChangeListener(this) // see onCheckedChanged
     }
+
+    private fun isVideoItem(mediaItem: MediaItem?): Boolean =
+        mediaItem?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO ||
+                mediaItem?.localConfiguration?.mimeType?.startsWith("video/", true) == true
 
     private fun updateDuration() {
         val duration = instance?.contentDuration?.let { if (it == C.TIME_UNSET) null else it }

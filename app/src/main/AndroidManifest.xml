@@ -85,6 +85,8 @@
         <activity
             android:name=".ui.VideoPlayerActivity"
             android:exported="false"
+            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
+            android:screenOrientation="sensorLandscape"
             android:theme="@style/Theme.Gramophone" />
         <activity
             android:name=".ui.MainActivity"
