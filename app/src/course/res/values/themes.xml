@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Course is a distinct product, so its brand color must not be replaced by wallpaper colors. -->
+    <style name="Base.Theme.Gramophone" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="viewInflaterClass">org.akanework.gramophone.logic.ui.ViewCompatInflater</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.App.BodyLarge</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.App.BodyLarge</item>
+        <item name="collapsingToolbarLayoutLargeStyle">@style/CollapsingToolbarLarge</item>
+        <item name="popupMenuBackground">@drawable/popup_background</item>
+        <item name="alertDialogTheme">@style/AppTheme.AlertDialog</item>
+        <item name="system_app_widget_background_radius">28dp</item>
+        <item name="system_app_widget_inner_radius">20dp</item>
+        <item name="previewPlayerElevation">1dp</item>
+    </style>
+</resources>

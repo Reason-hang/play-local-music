@@ -109,8 +109,8 @@ android {
         applicationId = appIdOverride ?: "org.akanework.gramophone"
         minSdk = 23
         targetSdk = 36
-        versionCode = 33
-        versionName = "1.6.1"
+        versionCode = 34
+        versionName = "1.6.2"
         if (buildVersionSuffix.isNotEmpty()) {
             versionNameSuffix = buildVersionSuffix
         }
@@ -143,10 +143,12 @@ android {
     productFlavors {
         create("local") {
             dimension = "product"
+            buildConfigField("boolean", "IS_COURSE", "false")
         }
         create("course") {
             dimension = "product"
             applicationIdSuffix = ".course"
+            buildConfigField("boolean", "IS_COURSE", "true")
         }
     }
 

@@ -1011,6 +1011,10 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     ): ListenableFuture<SessionResult> {
         if (customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY
             || customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_ATOMIC) {
+            // This is the common entry point for home, category, search and queue list clicks.
+            // Save before replacing the player timeline: after replacement the old position is no
+            // longer reliably available from ExoPlayer callbacks.
+            saveCurrentVideoProgress()
             val songList = MediaItemList.getList(
                 customCommand.customExtras.getBinder("items")!!)
             val position = customCommand.customExtras.getInt("position")
@@ -1019,9 +1023,14 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
             val itemsFuture = Futures.transform(
                 onAddMediaItems(session, controller, songList),
                 { songList ->
+                    val selectedItem = songList.getOrNull(position)
+                    val resumePositionMs = selectedItem
+                        ?.takeUnless { it.mediaId == endedWorkaroundPlayer?.currentMediaItem?.mediaId }
+                        ?.let(videoResumeProgressStore::resumePosition)
+                        ?: C.TIME_UNSET
                     if (seamless) {
                         endedWorkaroundPlayer!!.setMediaItemsSeamlessly(songList,
-                            position, title, pinned = false, original = true,
+                            position, resumePositionMs, title, pinned = false, original = true,
                             repeatMode = null, shuffleModeEnabled = null, playbackParameters = null)
                     } else {
                         val shuffleModeEnabled = if (customCommand.customExtras.containsKey("shuffleEnabled"))
@@ -1029,7 +1038,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
                         val repeatMode = if (customCommand.customExtras.containsKey("repeatMode"))
                             customCommand.customExtras.getInt("repeatMode") else null
                         endedWorkaroundPlayer!!.setMediaItems(songList, startIndex = position,
-                            startPositionMs = C.TIME_UNSET, title, pinned = false, original = true,
+                            startPositionMs = resumePositionMs, title, pinned = false, original = true,
                             newShuffleOrder = null, ended = false, repeatMode = repeatMode,
                             shuffleModeEnabled = shuffleModeEnabled, playbackParameters = null)
                     }
@@ -1170,6 +1179,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
                 SERVICE_QB_LOAD_QUEUE -> {
                     val index = customCommand.customExtras.getInt("index")
                     val startIndex = customCommand.customExtras.getInt("startIndex")
+                    saveCurrentVideoProgress()
                     qb.commitQueue(index, startIndex)
                     SessionResult(SessionResult.RESULT_SUCCESS)
                 }

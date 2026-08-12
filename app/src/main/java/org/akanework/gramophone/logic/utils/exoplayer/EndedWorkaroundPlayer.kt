@@ -199,6 +199,7 @@ class EndedWorkaroundPlayer(
     fun setMediaItemsSeamlessly(
         mediaItems: List<MediaItem>,
         startIndex: Int,
+        startPositionMs: Long,
         title: String,
         pinned: Boolean,
         original: Boolean,
@@ -243,7 +244,7 @@ class EndedWorkaroundPlayer(
                 )
         } else {
             setMediaItems(
-                mediaItems, startIndex, C.TIME_UNSET, title, pinned,
+                mediaItems, startIndex, startPositionMs, title, pinned,
                 original, null, false, repeatMode, shuffleModeEnabled,
                 playbackParameters
             )

@@ -112,6 +112,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.GramophonePlaybackService
 import org.akanework.gramophone.logic.clone
@@ -677,7 +678,7 @@ class FullBottomSheet
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "color_accuracy" || key == "content_based_color") {
-            if (DynamicColors.isDynamicColorAvailable() &&
+            if (!BuildConfig.IS_COURSE && DynamicColors.isDynamicColorAvailable() &&
                 prefs.getBooleanStrict("content_based_color", true)
             ) {
                 addColorScheme()
@@ -1466,7 +1467,7 @@ class FullBottomSheet
                 scale(Scale.FILL)
                 error(R.drawable.ic_default_cover)
             }
-            if (DynamicColors.isDynamicColorAvailable() &&
+            if (!BuildConfig.IS_COURSE && DynamicColors.isDynamicColorAvailable() &&
                 prefs.getBooleanStrict("content_based_color", true)
             ) {
                 addColorScheme()

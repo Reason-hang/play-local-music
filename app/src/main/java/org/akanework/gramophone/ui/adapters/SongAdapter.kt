@@ -88,6 +88,7 @@ class SongAdapter(
 
     override fun itemLayout(): Int = when (layoutType) {
         LayoutType.GRID, LayoutType.COMPACT_GRID -> super.itemLayout()
+        LayoutType.COMPACT_LIST -> R.layout.adapter_song_compact_list_card
         else -> R.layout.adapter_song_list_card
     }
 

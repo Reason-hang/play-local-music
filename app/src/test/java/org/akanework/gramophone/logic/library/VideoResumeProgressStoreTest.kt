@@ -69,6 +69,21 @@ class VideoResumeProgressStoreTest {
         assertNull(store.resumePosition(item))
     }
 
+    @Test
+    fun keepsSeparateProgressForEachVideoAfterStoreIsRecreated() {
+        val firstVideo = video("first", 3_600_000, 10)
+        val secondVideo = video("second", 3_600_000, 20)
+
+        VideoResumeProgressStore(context).apply {
+            save(firstVideo, 755_000)
+            save(secondVideo, 200_000)
+        }
+
+        val restoredStore = VideoResumeProgressStore(context)
+        assertEquals(755_000L, restoredStore.resumePosition(firstVideo))
+        assertEquals(200_000L, restoredStore.resumePosition(secondVideo))
+    }
+
     private fun video(id: String, duration: Long, modifiedDate: Long): MediaItem = MediaItem.Builder()
         .setMediaId("MediaStore:$id")
         .setMimeType("video/mp4")
