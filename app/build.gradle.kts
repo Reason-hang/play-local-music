@@ -109,8 +109,8 @@ android {
         applicationId = appIdOverride ?: "org.akanework.gramophone"
         minSdk = 23
         targetSdk = 36
-        versionCode = 31
-        versionName = "1.5.0"
+        versionCode = 32
+        versionName = "1.6.0"
         if (buildVersionSuffix.isNotEmpty()) {
             versionNameSuffix = buildVersionSuffix
         }
@@ -136,6 +136,17 @@ android {
         )
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    flavorDimensions += "product"
+    productFlavors {
+        create("local") {
+            dimension = "product"
+        }
+        create("course") {
+            dimension = "product"
+            applicationIdSuffix = ".course"
         }
     }
 

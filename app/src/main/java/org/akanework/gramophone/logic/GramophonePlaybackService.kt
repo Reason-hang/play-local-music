@@ -128,6 +128,7 @@ import org.akanework.gramophone.logic.utils.BtCodecInfo
 import org.akanework.gramophone.logic.utils.CircularShuffleOrder
 import org.akanework.gramophone.logic.utils.Flags
 import org.akanework.gramophone.logic.diagnostics.DiagnosticStore
+import org.akanework.gramophone.logic.library.VideoResumeProgressStore
 import org.akanework.gramophone.logic.utils.LastPlayedManager
 import org.akanework.gramophone.logic.utils.LrcUtils.LrcParserOptions
 import org.akanework.gramophone.logic.utils.LrcUtils.extractAndParseLyrics
@@ -172,6 +173,8 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         const val PENDING_INTENT_NOTIFY_ID = 1
         const val PENDING_INTENT_WIDGET_ID = 2
         const val PENDING_INTENT_FAVE_ID = 3
+        private const val VIDEO_PROGRESS_SAVE_INTERVAL_MS = 15_000L
+        private const val VIDEO_PROGRESS_RESTORE_POSITION_LIMIT_MS = 5_000L
 
         const val SERVICE_SET_TIMER = "set_timer"
         const val SERVICE_QUERY_TIMER = "query_timer"
@@ -218,7 +221,17 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     private lateinit var playbackHandler: Handler
     private lateinit var nm: NotificationManagerCompat
     private lateinit var lastPlayedManager: LastPlayedManager
+    private lateinit var videoResumeProgressStore: VideoResumeProgressStore
     private lateinit var prefs: SharedPreferences
+    private var lastActiveVideo: MediaItem? = null
+    private val periodicVideoProgressSaver = object : Runnable {
+        override fun run() {
+            saveCurrentVideoProgress()
+            if (endedWorkaroundPlayer?.isPlaying == true) {
+                handler.postDelayed(this, VIDEO_PROGRESS_SAVE_INTERVAL_MS)
+            }
+        }
+    }
     private var lastSentHighlightedLyric: String? = null
     private lateinit var afFormatTracker: AfFormatTracker
     private lateinit var rgAp: ReplayGainAudioProcessor
@@ -464,6 +477,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         player.exoPlayer.setShuffleOrder(CircularShuffleOrder(player, 0, 0, Random.nextLong()))
         lastPlayedManager = LastPlayedManager(this, player)
         lastPlayedManager.allowSavingState = false
+        videoResumeProgressStore = VideoResumeProgressStore(this)
         libraryTreeLoader = LibraryTreeLoader(
             this,
             gramophoneApplication,
@@ -812,6 +826,8 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         unregisterReceiver(seekReceiver)
         unregisterReceiver(btReceiver)
         prefs.unregisterOnSharedPreferenceChangeListener(this)
+        handler.removeCallbacks(periodicVideoProgressSaver)
+        saveCurrentVideoProgress()
         // Important: this must happen before sending stop() as that changes state ENDED -> IDLE
         lastPlayedManager.save()
         scope.cancel()
@@ -1470,6 +1486,9 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
                     ?.localConfiguration?.mimeType ?: "unknown")
             )
         )
+        if (state == Player.STATE_ENDED) {
+            saveCurrentVideoProgress()
+        }
         if (state == Player.STATE_IDLE) {
             var changed = false
             if (afTrackFormat != null) {
@@ -1569,10 +1588,13 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
             )
         }
 
+        lastActiveVideo = mediaItem.takeIf(::isVideoItem)
+        restoreVideoProgressIfNeeded(mediaItem, reason)
         lastPlayedManager.save()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
+        saveCurrentVideoProgress()
         if (prefs.getBooleanStrict("stopPlayingWhenDismissTask", false) &&
             rootIntent?.component != ComponentName(this, AudioPreviewActivity::class.java)
         ) {
@@ -1584,6 +1606,11 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         scheduleSendingLyrics(false)
+        saveCurrentVideoProgress()
+        handler.removeCallbacks(periodicVideoProgressSaver)
+        if (isPlaying) {
+            handler.postDelayed(periodicVideoProgressSaver, VIDEO_PROGRESS_SAVE_INTERVAL_MS)
+        }
         lastPlayedManager.save()
     }
 
@@ -1691,6 +1718,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         reason: Int
     ) {
         if (oldPosition.periodUid != newPosition.periodUid) {
+            lastActiveVideo?.let { videoResumeProgressStore.save(it, oldPosition.positionMs) }
             var changed = false
             downstreamFormat.toSet().forEach {
                 if (newPosition.periodUid != it.first) {
@@ -1722,6 +1750,40 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
             }
         }
         scheduleSendingLyrics(false)
+    }
+
+    private fun isVideoItem(item: MediaItem?): Boolean = item?.let {
+        it.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO ||
+            it.localConfiguration?.mimeType?.startsWith("video/", ignoreCase = true) == true
+    } == true
+
+    private fun saveCurrentVideoProgress() {
+        val player = endedWorkaroundPlayer ?: return
+        player.currentMediaItem?.takeIf(::isVideoItem)?.let {
+            videoResumeProgressStore.save(it, player.currentPosition)
+        }
+    }
+
+    private fun restoreVideoProgressIfNeeded(mediaItem: MediaItem?, reason: Int) {
+        val item = mediaItem ?: return
+        if (!isVideoItem(item) ||
+            reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
+            reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT
+        ) return
+        handler.post {
+            val player = endedWorkaroundPlayer ?: return@post
+            if (player.currentMediaItem?.mediaId != item.mediaId ||
+                player.currentPosition > VIDEO_PROGRESS_RESTORE_POSITION_LIMIT_MS
+            ) return@post
+            val positionMs = videoResumeProgressStore.resumePosition(item) ?: return@post
+            player.seekTo(positionMs)
+            DiagnosticStore.recordEvent(
+                this,
+                module = "player",
+                event = "video_resume_restored",
+                details = mapOf("positionSeconds" to (positionMs / 1000).toString())
+            )
+        }
     }
 
     private fun scheduleSendingLyrics(new: Boolean) {

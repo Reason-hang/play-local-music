@@ -111,8 +111,8 @@ class LibraryManagementActivity : AppCompatActivity() {
             }
 
             manager.state.value.hidden.isNotEmpty() -> MaterialAlertDialogBuilder(this)
-                .setTitle("旧版已移除内容")
-                .setMessage("旧版记录未保存媒体标题，无法逐项展示。全部恢复只会恢复本地听歌的隐藏记录，不会修改手机文件。")
+                .setTitle("历史移除记录")
+                .setMessage("这些媒体在早期版本中已从媒体库移除。由于当时未保存标题，暂不能逐项显示。全部恢复只会恢复应用内的隐藏记录，不会删除、移动或修改手机文件。")
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton("全部恢复") { _, _ -> manager.restoreAll() }
                 .show()
