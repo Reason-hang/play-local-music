@@ -208,6 +208,14 @@
 - 自动化证据：本地和课程变体的 `VideoResumeProgressStoreTest` 均为 3/3 通过；本地全量单测为 55 项中 54 项通过，唯一失败仍是未触及的 `LrcUtilsTest.testTemplateLrcTranslationType1`；双变体 Lint 均为 0 Error、127 Warning。
 - 真机边界：本轮 `adb devices -l` 没有可用设备，无法验证两个图标实际并存、启动页图标渲染、锁屏/系统回收续播和硬件视频解码。交付文档保留人工验收矩阵，不以 APK 清单检查替代真机结论。
 
+### D-026 1.6.1 修正歌词测试夹具
+
+- 背景：全量单测 `LrcUtilsTest.testTemplateLrcTranslationType1` 失败；初步判断为空白时间戳处理不一致，必须以失败断言而非猜测决定修复范围。
+- 根因：`ALL_STAR` 源 LRC 在 `00:24.300` 有空白原文时间戳。解析结果保留该原文行，但不生成空白翻译行；测试期望额外保留了一条 `isTranslated=true` 的空白行，导致期望 101 条、实际 100 条。
+- 决策：仅删除测试夹具中的空白翻译期望，不修改 `LrcUtils` 解析器、不启用歌词入口，也不改变播放逻辑。解析器保留空白原文是既有语义，改动产品代码只为满足错误测试会扩大影响面。
+- 验证：先对两个变体定向运行 `LrcUtilsTest`，再无筛选运行 `:app:testLocalDebugUnitTest :app:testCourseDebugUnitTest`；两个变体各 55 项、共 110 项通过，0 失败。版本升级为 versionCode 33、versionName `1.6.1`，两个 APK 均通过 v1/v2 签名、zipalign、应用 ID 与离线权限核验。
+- 真机边界：本修复只涉及测试源码，不能也不应被表述为 MP3、MP4、锁屏、蓝牙或 HyperOS 的新增真机验证。
+
 ## 当前风险与回滚
 
 最重要的未验证项是 Redmi K80 Pro/HyperOS 上两个应用的实际并存、MP4 画面、锁屏后台以及异常回收后的独立视频进度；其次是大媒体库的 MP4 探测耗时和正式签名升级。任何阻断问题先保留诊断摘要、最小化复现，再分别按 D-023 的进度存储或 D-003 的渲染入口回滚，始终保留 MP3 基线。
