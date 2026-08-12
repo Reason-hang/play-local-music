@@ -8,7 +8,7 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/shuffle"
-        android:icon="@drawable/ic_shuffle"
+        android:icon="@drawable/ic_random_play"
         android:title="@string/home_menu_shuffle"
         app:showAsAction="never" />
     <item
@@ -23,7 +23,7 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/library_management"
-        android:title="媒体库整理"
+        android:title="@string/library_management"
         app:showAsAction="never" />
     <item
         android:id="@+id/settings"

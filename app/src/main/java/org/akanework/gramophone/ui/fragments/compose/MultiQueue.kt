@@ -530,7 +530,7 @@ fun ActionBar(
                 enabled = !mqState.isDetached(),
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_shuffle),
+                    painter = painterResource(R.drawable.ic_random_play),
                     contentDescription = null,
                     tint = LocalContentColor.current.copy(if (shuffleModeEnabled) 1f else 0.5f)
                 )

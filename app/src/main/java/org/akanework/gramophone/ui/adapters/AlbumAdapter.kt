@@ -21,18 +21,11 @@ import android.net.Uri
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.akanework.gramophone.R
-import org.akanework.gramophone.logic.getFile
 import org.akanework.gramophone.ui.MainActivity
 import org.akanework.gramophone.ui.fragments.GeneralSubFragment
 import uk.akane.libphonograph.items.Album
-import uk.akane.libphonograph.manipulator.ItemManipulator
 import java.util.GregorianCalendar
 
 class AlbumAdapter(
@@ -75,7 +68,6 @@ class AlbumAdapter(
         popupMenu.inflate(R.menu.more_menu)
         popupMenu.menu.iterator().forEach {
             it.isVisible = it.itemId == R.id.play_next || it.itemId == R.id.add_to_queue
-                    || it.itemId == R.id.delete
         }
         popupMenu.setOnMenuItemClickListener { it1 ->
             when (it1.itemId) {
@@ -92,32 +84,6 @@ class AlbumAdapter(
                     mediaController?.addMediaItems(
                         item.songList,
                     )
-                }
-
-                R.id.delete -> {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val res = ItemManipulator.deleteSongs(
-                            mainActivity,
-                            item.songList.map { it.getFile()!! to it.localConfiguration!!.uri }
-                        )
-                        if (res != null) {
-                            withContext(Dispatchers.Main) {
-                                MaterialAlertDialogBuilder(context)
-                                    .setTitle(R.string.delete)
-                                    .setMessage(
-                                        context.getString(
-                                            R.string.delete_really,
-                                            item.title
-                                        )
-                                    )
-                                    .setPositiveButton(R.string.delete) { _, _ ->
-                                        res.invoke()
-                                    }
-                                    .setNegativeButton(android.R.string.cancel) { _, _ -> }
-                                    .show()
-                            }
-                        }
-                    }
                 }
 
                 /*

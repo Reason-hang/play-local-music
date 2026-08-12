@@ -73,7 +73,7 @@
             android:insetRight="0dp"
             android:insetBottom="0dp"
             android:visibility="gone"
-            app:icon="@drawable/ic_shuffle"
+            app:icon="@drawable/ic_random_play"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="22dp"

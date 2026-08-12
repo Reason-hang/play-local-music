@@ -198,6 +198,8 @@
     <string name="home_menu_shuffle">全部随机播放</string>
     <string name="grant_audio"><![CDATA[请授予“音乐和音频”权限]]></string>
     <string name="delete">删除</string>
+    <string name="remove_from_library">从媒体库移除（不删除手机文件）</string>
+    <string name="library_management">媒体库整理</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="sort_by_file_path">文件路径</string>

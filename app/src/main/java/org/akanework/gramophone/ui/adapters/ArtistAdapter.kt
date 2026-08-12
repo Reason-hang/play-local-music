@@ -24,18 +24,11 @@ import androidx.core.content.edit
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.getBooleanStrict
-import org.akanework.gramophone.logic.getFile
 import org.akanework.gramophone.ui.MainActivity
 import org.akanework.gramophone.ui.fragments.ArtistSubFragment
 import uk.akane.libphonograph.items.Artist
-import uk.akane.libphonograph.manipulator.ItemManipulator
 
 /**
  * [ArtistAdapter] is an adapter for displaying artists.
@@ -85,7 +78,6 @@ class ArtistAdapter(
         popupMenu.inflate(R.menu.more_menu)
         popupMenu.menu.iterator().forEach {
             it.isVisible = it.itemId == R.id.play_next || it.itemId == R.id.add_to_queue
-                    || it.itemId == R.id.delete
         }
 
         popupMenu.setOnMenuItemClickListener { it1 ->
@@ -104,33 +96,6 @@ class ArtistAdapter(
                     mediaController?.addMediaItems(
                         item.songList,
                     )
-                    true
-                }
-
-                R.id.delete -> {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val res = ItemManipulator.deleteSongs(
-                            mainActivity,
-                            item.songList.map { it.getFile()!! to it.localConfiguration!!.uri }
-                        )
-                        if (res != null) {
-                            withContext(Dispatchers.Main) {
-                                MaterialAlertDialogBuilder(context)
-                                    .setTitle(R.string.delete)
-                                    .setMessage(
-                                        context.getString(
-                                            R.string.delete_really_artist,
-                                            item.title
-                                        )
-                                    )
-                                    .setPositiveButton(R.string.delete) { _, _ ->
-                                        res.invoke()
-                                    }
-                                    .setNegativeButton(android.R.string.cancel) { _, _ -> }
-                                    .show()
-                            }
-                        }
-                    }
                     true
                 }
 

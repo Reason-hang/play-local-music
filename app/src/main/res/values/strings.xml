@@ -427,6 +427,8 @@
     <string name="lyric_widget_description">Widget that shows lyrics of currently playing media</string>
     <!-- Context menu item to delete song/album/playlist -->
     <string name="delete">Delete</string>
+    <string name="remove_from_library">Remove from library (keep phone file)</string>
+    <string name="library_management">Library management</string>
     <!-- Dialog text to confirm user wants to delete a specific song or playlist with user defined name -->
     <string name="delete_really">Do you really want to delete \"%s\"? This action cannot be undone.</string>
     <!-- Dialog text to confirm user wants to delete all songs by an artist -->

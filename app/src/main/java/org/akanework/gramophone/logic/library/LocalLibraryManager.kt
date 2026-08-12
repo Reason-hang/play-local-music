@@ -20,10 +20,31 @@ class LocalLibraryManager(context: Context) {
     fun isHidden(mediaItem: MediaItem): Boolean = mediaKeys(mediaItem).any(state.value.hidden::contains)
 
     fun hide(items: Collection<MediaItem>) = update { current ->
-        current.copy(hidden = current.hidden + items.flatMap(::mediaKeys))
+        val records = items.associate { mediaItem ->
+            categoryKey(mediaItem) to HiddenMediaRecord(
+                title = mediaItem.mediaMetadata.title?.toString()?.takeIf(String::isNotBlank)
+                    ?: mediaItem.getFile()?.name
+                    ?: mediaItem.mediaId,
+                keys = mediaKeys(mediaItem)
+            )
+        }
+        current.copy(
+            hidden = current.hidden + records.values.flatMap(HiddenMediaRecord::keys),
+            hiddenRecords = current.hiddenRecords + records
+        )
     }
 
-    fun restoreAll() = update { current -> current.copy(hidden = emptySet()) }
+    fun restore(recordIds: Collection<String>) = update { current ->
+        val records = current.hiddenRecords.filterKeys(recordIds::contains)
+        current.copy(
+            hidden = current.hidden - records.values.flatMap(HiddenMediaRecord::keys).toSet(),
+            hiddenRecords = current.hiddenRecords - recordIds.toSet()
+        )
+    }
+
+    fun restoreAll() = update { current ->
+        current.copy(hidden = emptySet(), hiddenRecords = emptyMap())
+    }
 
     fun addToCategory(name: String, items: Collection<MediaItem>) = update { current ->
         val cleanName = name.trim()
@@ -55,14 +76,30 @@ class LocalLibraryManager(context: Context) {
     private fun readState(): LibraryState = runCatching {
         val root = JSONObject(preferences.getString(STATE_KEY, "{}"))
         val hidden = root.optJSONArray("hidden").toStringSet()
+        val hiddenRecords = root.optJSONObject("hiddenRecords")?.keys()?.asSequence()?.associateWith { id ->
+            root.getJSONObject("hiddenRecords").getJSONObject(id).let { record ->
+                HiddenMediaRecord(
+                    title = record.optString("title", "已移除媒体"),
+                    keys = record.optJSONArray("keys").toStringSet()
+                )
+            }
+        }.orEmpty()
         val categories = root.optJSONObject("categories")?.keys()?.asSequence()?.associateWith { name ->
             root.getJSONObject("categories").optJSONArray(name).toStringSet()
         }.orEmpty()
-        LibraryState(hidden, categories, root.optString("activeFilter", FILTER_ALL))
+        LibraryState(hidden, hiddenRecords, categories, root.optString("activeFilter", FILTER_ALL))
     }.getOrDefault(LibraryState())
 
     private fun encode(value: LibraryState) = JSONObject().apply {
         put("hidden", JSONArray(value.hidden.toList()))
+        put("hiddenRecords", JSONObject().apply {
+            value.hiddenRecords.forEach { (id, record) ->
+                put(id, JSONObject().apply {
+                    put("title", record.title)
+                    put("keys", JSONArray(record.keys.toList()))
+                })
+            }
+        })
         put("categories", JSONObject().apply {
             value.categories.forEach { (name, keys) -> put(name, JSONArray(keys.toList())) }
         })
@@ -76,8 +113,14 @@ class LocalLibraryManager(context: Context) {
 
     data class LibraryState(
         val hidden: Set<String> = emptySet(),
+        val hiddenRecords: Map<String, HiddenMediaRecord> = emptyMap(),
         val categories: Map<String, Set<String>> = emptyMap(),
         val activeFilter: String = FILTER_ALL
+    )
+
+    data class HiddenMediaRecord(
+        val title: String,
+        val keys: Set<String>
     )
 
     companion object {

@@ -30,13 +30,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.getBooleanStrict
 import org.akanework.gramophone.logic.getFile
@@ -54,7 +50,6 @@ import uk.akane.libphonograph.items.albumId
 import uk.akane.libphonograph.items.albumYear
 import uk.akane.libphonograph.items.artistId
 import uk.akane.libphonograph.items.modifiedDate
-import uk.akane.libphonograph.manipulator.ItemManipulator
 import java.io.File
 import java.util.GregorianCalendar
 
@@ -246,7 +241,7 @@ class SongAdapter(
     }
 
     override fun onMenu(item: MediaItem, popupMenu: PopupMenu) {
-        popupMenu.inflate(R.menu.more_menu)
+        popupMenu.inflate(R.menu.more_menu_song)
 
         popupMenu.setOnMenuItemClickListener { it1 ->
             when (it1.itemId) {
@@ -290,30 +285,16 @@ class SongAdapter(
                     true
                 }
 
-                R.id.delete -> {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val res = ItemManipulator.deleteSongs(
-                            mainActivity,
-                            listOf(item.getFile()!! to item.localConfiguration!!.uri)
-                        )
-                        if (res != null) {
-                            withContext(Dispatchers.Main) {
-                                MaterialAlertDialogBuilder(context)
-                                    .setTitle(R.string.delete)
-                                    .setMessage(
-                                        context.getString(
-                                            R.string.delete_really,
-                                            item.mediaMetadata.title
-                                        )
-                                    )
-                                    .setPositiveButton(R.string.delete) { _, _ ->
-                                        res.invoke()
-                                    }
-                                    .setNegativeButton(android.R.string.cancel) { _, _ -> }
-                                    .show()
-                            }
+                R.id.remove_from_library -> {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.remove_from_library)
+                        .setMessage("将从本地听歌中隐藏此媒体。手机里的原始文件不会删除，可在“已移除内容”中恢复。")
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton("移除") { _, _ ->
+                            mainActivity.gramophoneApplication.localLibraryManager.hide(listOf(item))
+                            Toast.makeText(mainActivity, "已移出媒体库；手机文件未删除", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                        .show()
                     true
                 }
 
