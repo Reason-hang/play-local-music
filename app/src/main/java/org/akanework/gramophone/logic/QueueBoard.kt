@@ -86,6 +86,11 @@ class QueueBoard(
             new = new.copy(startIndex = startIndex, startPositionMs = C.TIME_UNSET)
         }
         val plr = player.endedWorkaroundPlayer!!
+        val startPositionMs = player.resolveQueueStartPosition(
+            new.queue,
+            new.startIndex,
+            new.startPositionMs
+        )
         if (QUEUE_DEBUG)
             Log.d(
                 TAG,
@@ -93,7 +98,7 @@ class QueueBoard(
             )
         plr.setMediaItems(
             new.queue, new.startIndex,
-            new.startPositionMs,
+            startPositionMs,
             new.title, new.expiry.value == null, new.isOriginal, new.shuffleOrder, new.ended,
             new.repeatMode, new.shuffleModeEnabled, null
         )

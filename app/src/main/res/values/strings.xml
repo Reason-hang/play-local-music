@@ -1163,6 +1163,8 @@
     <!-- Used in audio settings, this is a technical/"brand" name for an interoperable audio
     loudness normalization feature established since 2002 -->
     <string name="settings_replaygain">ReplayGain</string>
+    <string name="settings_external_loudness">Speaker loudness</string>
+    <string name="settings_external_loudness_desc">For phone speakers while running: compresses loudness differences and safely raises perceived volume. No headphones are required. It is off by default and can increase battery use.</string>
     <!-- Change the ReplayGain (this is a technical/"brand" name for an interoperable audio loudness
     normalization feature established since 2002) mode between off, Preserve album dynamics, All
     tracks equal loudness and Smart -->

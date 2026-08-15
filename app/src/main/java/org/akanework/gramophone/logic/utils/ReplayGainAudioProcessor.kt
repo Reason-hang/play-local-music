@@ -30,6 +30,8 @@ import java.nio.ByteBuffer
 class ReplayGainAudioProcessor : BaseAudioProcessor() {
     companion object {
         private const val TAG = "ReplayGainAP"
+        private const val EXTERNAL_LOUDNESS_GAIN_DB = 4f
+        private const val EXTERNAL_LOUDNESS_KNEE_THRESHOLD_DB = -10f
     }
 
     private var compressor: AdaptiveDynamicRangeCompression? = null
@@ -40,6 +42,8 @@ class ReplayGainAudioProcessor : BaseAudioProcessor() {
     var nonRgGain = 0 // dB
         private set
     var boostGain = 0 // dB
+        private set
+    var externalLoudnessEnabled = false
         private set
     var offloadEnabled = false
         private set
@@ -122,7 +126,7 @@ class ReplayGainAudioProcessor : BaseAudioProcessor() {
         if (Flags.TEST_RG_OFFLOAD) {
             return AudioProcessor.AudioFormat.NOT_SET
         }
-        if (computeGain()?.second != null) { // we need a compressor which outputs float32
+        if (computeProcessingGain()?.second != null) { // we need a compressor which outputs float32
             pendingOutputFloat = true
             toFloatPcmAudioProcessor.configure(inputAudioFormat)
             return AudioProcessor.AudioFormat(
@@ -188,6 +192,18 @@ class ReplayGainAudioProcessor : BaseAudioProcessor() {
         return applyGain()
     }
 
+    /** A speaker-oriented loudness profile that uses PCM compression rather than system volume. */
+    fun setExternalLoudnessEnabled(enabled: Boolean): Boolean {
+        val listener: (() -> Unit)?
+        synchronized(this) {
+            if (externalLoudnessEnabled == enabled) return true
+            listener = settingsChangedListener
+            externalLoudnessEnabled = enabled
+        }
+        listener?.invoke()
+        return applyGain()
+    }
+
     fun setReduceGain(reduceGain: Boolean): Boolean {
         val listener: (() -> Unit)?
         synchronized(this) {
@@ -233,12 +249,27 @@ class ReplayGainAudioProcessor : BaseAudioProcessor() {
         )
     }
 
+    private fun computeProcessingGain(): Pair<Float, Float?>? {
+        val replayGain = computeGain()
+        val externalLoudnessEnabled: Boolean
+        val nonRgGain: Int
+        synchronized(this) {
+            externalLoudnessEnabled = this.externalLoudnessEnabled
+            nonRgGain = this.nonRgGain
+        }
+        if (!externalLoudnessEnabled) return replayGain
+        val baseGain = replayGain?.first ?: ReplayGainUtil.dbToAmpl(nonRgGain.toFloat())
+        val threshold = replayGain?.second?.coerceAtMost(EXTERNAL_LOUDNESS_KNEE_THRESHOLD_DB)
+            ?: EXTERNAL_LOUDNESS_KNEE_THRESHOLD_DB
+        return baseGain * ReplayGainUtil.dbToAmpl(EXTERNAL_LOUDNESS_GAIN_DB) to threshold
+    }
+
     private fun applyGain(): Boolean {
         val nonRgGain: Int
         synchronized(this) {
             nonRgGain = this.nonRgGain
         }
-        val gain = computeGain()
+        val gain = computeProcessingGain()
         if ((gain?.second != null) != outputFloat) {
             return false
         }
@@ -270,4 +301,5 @@ class ReplayGainAudioProcessor : BaseAudioProcessor() {
         compressor?.release()
         compressor = null
     }
+
 }

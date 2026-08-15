@@ -453,18 +453,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
                     setParameters(
                         buildUponParameters()
                         .setAllowInvalidateSelectionsOnRendererCapabilitiesChange(true)
-                        .setAudioOffloadPreferences(
-                            TrackSelectionParameters.AudioOffloadPreferences.Builder()
-                                .apply {
-                                    val config =
-                                        prefs.getStringStrict("offload", "0")?.toIntOrNull()
-                                    if (config != null && config > 0 && Flags.OFFLOAD) {
-                                        rgAp.setOffloadEnabled(true)
-                                        setAudioOffloadMode(TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED)
-                                        setIsGaplessSupportRequired(config == 2)
-                                    }
-                                }
-                                .build()))
+                        .setAudioOffloadPreferences(createAudioOffloadPreferences()))
                 })
                 .setPlaybackLooper(internalPlaybackThread.looper)
                 .build(),
@@ -917,6 +906,32 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         Log.i(TAG, "onDisconnected(): $controller")
     }
 
+    private fun createAudioOffloadPreferences(): TrackSelectionParameters.AudioOffloadPreferences {
+        val config = prefs.getStringStrict("offload", "0")?.toIntOrNull()
+        val enabled = config != null && config > 0 && Flags.OFFLOAD &&
+            !prefs.getBooleanStrict("external_loudness", false)
+        rgAp.setOffloadEnabled(enabled)
+        return TrackSelectionParameters.AudioOffloadPreferences.Builder().apply {
+            if (enabled) {
+                setAudioOffloadMode(
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED
+                )
+                setIsGaplessSupportRequired(config == 2)
+            } else {
+                setAudioOffloadMode(
+                    TrackSelectionParameters.AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_DISABLED
+                )
+            }
+        }.build()
+    }
+
+    private fun updateAudioOffloadPreferences() {
+        val player = endedWorkaroundPlayer?.exoPlayer ?: return
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setAudioOffloadPreferences(createAudioOffloadPreferences())
+            .build()
+    }
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         var restart = false
         if (key == null || key == "rg_mode") {
@@ -938,6 +953,19 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         if (key == null || key == "rg_boost_gain") {
             val boostGain = prefs.getIntStrict("rg_boost_gain", 0)
             restart = !rgAp.setBoostGain(boostGain) || restart
+        }
+        if (key == null || key == "external_loudness") {
+            val enabled = prefs.getBooleanStrict("external_loudness", false)
+            restart = !rgAp.setExternalLoudnessEnabled(enabled) || restart
+            if (key != null) updateAudioOffloadPreferences()
+            if (key != null) {
+                DiagnosticStore.recordEvent(
+                    this,
+                    module = "audio",
+                    event = "external_loudness_changed",
+                    details = mapOf("enabled" to enabled.toString())
+                )
+            }
         }
         if (restart) {
             controller?.stop()
@@ -1021,23 +1049,25 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
             val title = customCommand.customExtras.getString("title")!!
             val seamless = customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY
             val itemsFuture = Futures.transform(
-                onAddMediaItems(session, controller, songList),
-                { songList ->
-                    val selectedItem = songList.getOrNull(position)
+                expandAndMapMediaItems(songList),
+                { expanded ->
+                    val expandedSongList = expanded.mediaItems
+                    val selectedIndex = expanded.startIndex ?: position
+                    val selectedItem = expandedSongList.getOrNull(selectedIndex)
                     val resumePositionMs = selectedItem
                         ?.takeUnless { it.mediaId == endedWorkaroundPlayer?.currentMediaItem?.mediaId }
                         ?.let(videoResumeProgressStore::resumePosition)
                         ?: C.TIME_UNSET
                     if (seamless) {
-                        endedWorkaroundPlayer!!.setMediaItemsSeamlessly(songList,
-                            position, resumePositionMs, title, pinned = false, original = true,
+                        endedWorkaroundPlayer!!.setMediaItemsSeamlessly(expandedSongList,
+                            selectedIndex, resumePositionMs, title, pinned = false, original = true,
                             repeatMode = null, shuffleModeEnabled = null, playbackParameters = null)
                     } else {
                         val shuffleModeEnabled = if (customCommand.customExtras.containsKey("shuffleEnabled"))
                             customCommand.customExtras.getBoolean("shuffleEnabled") else null
                         val repeatMode = if (customCommand.customExtras.containsKey("repeatMode"))
                             customCommand.customExtras.getInt("repeatMode") else null
-                        endedWorkaroundPlayer!!.setMediaItems(songList, startIndex = position,
+                        endedWorkaroundPlayer!!.setMediaItems(expandedSongList, startIndex = selectedIndex,
                             startPositionMs = resumePositionMs, title, pinned = false, original = true,
                             newShuffleOrder = null, ended = false, repeatMode = repeatMode,
                             shuffleModeEnabled = shuffleModeEnabled, playbackParameters = null)
@@ -1774,6 +1804,19 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         }
     }
 
+    /** Used by QueueBoard before it replaces the timeline for an explicitly selected queue. */
+    fun resolveQueueStartPosition(
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        requestedStartPositionMs: Long
+    ): Long {
+        saveCurrentVideoProgress()
+        if (requestedStartPositionMs != C.TIME_UNSET) return requestedStartPositionMs
+        return mediaItems.getOrNull(startIndex)
+            ?.let(videoResumeProgressStore::resumePosition)
+            ?: C.TIME_UNSET
+    }
+
     private fun restoreVideoProgressIfNeeded(mediaItem: MediaItem?, reason: Int) {
         val item = mediaItem ?: return
         if (!isVideoItem(item) ||
@@ -1782,18 +1825,31 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         ) return
         handler.post {
             val player = endedWorkaroundPlayer ?: return@post
-            if (player.currentMediaItem?.mediaId != item.mediaId ||
-                player.currentPosition > VIDEO_PROGRESS_RESTORE_POSITION_LIMIT_MS
-            ) return@post
-            val positionMs = videoResumeProgressStore.resumePosition(item) ?: return@post
+            if (player.currentMediaItem?.mediaId != item.mediaId) {
+                recordVideoResumeEvent("video_resume_skipped", "current_item_changed")
+                return@post
+            }
+            if (player.currentPosition > VIDEO_PROGRESS_RESTORE_POSITION_LIMIT_MS) {
+                recordVideoResumeEvent("video_resume_skipped", "player_already_advanced")
+                return@post
+            }
+            val positionMs = videoResumeProgressStore.resumePosition(item)
+            if (positionMs == null) {
+                recordVideoResumeEvent("video_resume_not_found")
+                return@post
+            }
             player.seekTo(positionMs)
-            DiagnosticStore.recordEvent(
-                this,
-                module = "player",
-                event = "video_resume_restored",
-                details = mapOf("positionSeconds" to (positionMs / 1000).toString())
-            )
+            recordVideoResumeEvent("video_resume_restored", positionMs / 1000)
         }
+    }
+
+    private fun recordVideoResumeEvent(event: String, detail: Any? = null) {
+        DiagnosticStore.recordEvent(
+            this,
+            module = "player",
+            event = event,
+            details = detail?.let { mapOf("detail" to it.toString()) } ?: emptyMap()
+        )
     }
 
     private fun scheduleSendingLyrics(new: Boolean) {
@@ -1965,9 +2021,20 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         mediaSession: MediaSession,
         controller: MediaSession.ControllerInfo,
         mediaItems: List<MediaItem>
-    ): ListenableFuture<List<MediaItem>> = lifecycleScope.future(Dispatchers.Default) {
+    ): ListenableFuture<List<MediaItem>> = Futures.transform(
+        expandAndMapMediaItems(mediaItems),
+        { it.mediaItems },
+        MoreExecutors.directExecutor()
+    )
+
+    private fun expandAndMapMediaItems(mediaItems: List<MediaItem>): ListenableFuture<LibraryTreeLoader.ExpandedMediaItems> =
+        lifecycleScope.future(Dispatchers.Default) {
+            expandAndMapMediaItemsInternal(mediaItems)
+        }
+
+    private suspend fun expandAndMapMediaItemsInternal(mediaItems: List<MediaItem>): LibraryTreeLoader.ExpandedMediaItems {
         val expanded = libraryTreeLoader.addMediaItems(mediaItems).await()
-        mapMediaItemsForFavorites(expanded.mediaItems)
+        return expanded.copy(mediaItems = mapMediaItemsForFavorites(expanded.mediaItems))
     }
 
     override fun onSetMediaItems(
@@ -1977,8 +2044,11 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         startIndex: Int,
         startPositionMs: Long
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> = lifecycleScope.future(Dispatchers.Default) {
-        val expanded = libraryTreeLoader.addMediaItems(mediaItems).await()
-        val mapped = mapMediaItemsForFavorites(expanded.mediaItems)
-        MediaSession.MediaItemsWithStartPosition(mapped, expanded.startIndex ?: startIndex, startPositionMs)
+        val expanded = expandAndMapMediaItemsInternal(mediaItems)
+        MediaSession.MediaItemsWithStartPosition(
+            expanded.mediaItems,
+            expanded.startIndex ?: startIndex,
+            startPositionMs
+        )
     }
 }

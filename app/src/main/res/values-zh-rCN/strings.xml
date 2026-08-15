@@ -489,6 +489,8 @@
     <string name="sort_by_album_artist_year"><![CDATA[专辑音乐人 -&gt; 年份]]></string>
     <string name="forbidden_symbol_error">名称中包含无效字符</string>
     <string name="settings_replaygain">回放增益</string>
+    <string name="settings_external_loudness">外放强音</string>
+    <string name="settings_external_loudness_desc">为手机扬声器跑步外放设计：压缩响度差距并安全提高感知音量。无需耳机，默认关闭；开启后会增加耗电，原始音频已很响时提升有限。</string>
     <string name="settings_replaygain_mode">模式</string>
     <string name="settings_replaygain_preamp">前置放大</string>
     <string name="settings_replaygain_no_rg_amp">衰减（无回放增益）</string>
