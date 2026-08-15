@@ -30,18 +30,24 @@ class VideoResumeProgressStore(
     @Synchronized
     fun save(item: MediaItem, positionMs: Long) {
         if (!item.isVideo()) return
-        val fingerprint = item.fingerprint() ?: return
+        val fingerprints = item.fingerprints()
+        if (fingerprints.isEmpty()) return
         val durationMs = item.mediaMetadata.durationMs ?: return
         if (durationMs <= 0 || positionMs < MIN_SAVE_POSITION_MS || isFinished(positionMs, durationMs)) {
-            if (records.remove(fingerprint.key) != null) persist()
+            var removed = false
+            fingerprints.forEach { fingerprint ->
+                removed = records.remove(fingerprint.key) != null || removed
+            }
+            if (removed) persist()
             return
         }
-        records[fingerprint.key] = Record(
+        val record = Record(
             positionMs = positionMs.coerceAtMost(durationMs),
             durationMs = durationMs,
-            modifiedDate = fingerprint.modifiedDate,
+            modifiedDate = fingerprints.firstNotNullOfOrNull { it.modifiedDate },
             updatedAtMs = now()
         )
+        fingerprints.forEach { records[it.key] = record }
         trim()
         persist()
     }
@@ -49,29 +55,45 @@ class VideoResumeProgressStore(
     @Synchronized
     fun resumePosition(item: MediaItem): Long? {
         if (!item.isVideo()) return null
-        val fingerprint = item.fingerprint() ?: return null
-        val record = records[fingerprint.key] ?: return null
-        if (record.durationMs != item.mediaMetadata.durationMs ||
-            record.modifiedDate != fingerprint.modifiedDate ||
-            isExpired(record)
-        ) {
-            records.remove(fingerprint.key)
+        val fingerprints = item.fingerprints()
+        if (fingerprints.isEmpty()) return null
+        val invalidKeys = mutableSetOf<String>()
+        fingerprints.forEach { fingerprint ->
+            val record = records[fingerprint.key] ?: return@forEach
+            if (!record.matches(item.mediaMetadata.durationMs, fingerprint.modifiedDate) || isExpired(record)) {
+                invalidKeys += fingerprint.key
+                return@forEach
+            }
+            val positionMs = record.positionMs
+                .takeIf { it >= MIN_SAVE_POSITION_MS && !isFinished(it, record.durationMs) }
+                ?: return@forEach
+            // Migrate records written by 1.6.2, which only used one identity representation.
+            fingerprints.forEach { records[it.key] = record }
+            if (invalidKeys.isNotEmpty()) invalidKeys.forEach(records::remove)
             persist()
-            return null
+            return positionMs
         }
-        return record.positionMs.takeIf { it >= MIN_SAVE_POSITION_MS && !isFinished(it, record.durationMs) }
+        if (invalidKeys.isNotEmpty()) {
+            invalidKeys.forEach(records::remove)
+            persist()
+        }
+        return null
     }
 
     private fun MediaItem.isVideo(): Boolean =
         mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_VIDEO ||
             localConfiguration?.mimeType?.startsWith("video/", true) == true
 
-    private fun MediaItem.fingerprint(): Fingerprint? {
-        val key = getFile()?.absolutePath?.let(MediaIdentity::pathKey)
-            ?: mediaId.takeIf(String::isNotBlank)?.let { "id:$it" }
-            ?: return null
-        return Fingerprint(key, mediaMetadata.modifiedDate)
+    private fun MediaItem.fingerprints(): List<Fingerprint> = buildList {
+        mediaId.takeIf(String::isNotBlank)?.let { add(Fingerprint("id:$it", mediaMetadata.modifiedDate)) }
+        getFile()?.absolutePath?.let(MediaIdentity::pathKey)
+            ?.takeUnless { pathKey -> any { it.key == pathKey } }
+            ?.let { add(Fingerprint(it, mediaMetadata.modifiedDate)) }
     }
+
+    private fun Record.matches(durationMs: Long?, modifiedDate: Long?): Boolean =
+        (durationMs == null || this.durationMs == durationMs) &&
+            (modifiedDate == null || this.modifiedDate == null || this.modifiedDate == modifiedDate)
 
     private fun isFinished(positionMs: Long, durationMs: Long): Boolean =
         durationMs - positionMs <= min(FINISHED_THRESHOLD_MS, durationMs / 10)
@@ -88,7 +110,7 @@ class VideoResumeProgressStore(
     }
 
     private fun readRecords(): Map<String, Record> = runCatching {
-        val root = JSONObject(preferences.getString(STATE_KEY, "{}"))
+        val root = JSONObject(preferences.getString(STATE_KEY, "{}") ?: "{}")
         root.keys().asSequence().associateWith { key ->
             root.getJSONObject(key).let {
                 Record(

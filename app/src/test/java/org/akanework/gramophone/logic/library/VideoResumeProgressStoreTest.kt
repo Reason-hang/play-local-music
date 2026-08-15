@@ -84,6 +84,39 @@ class VideoResumeProgressStoreTest {
         assertEquals(200_000L, restoredStore.resumePosition(secondVideo))
     }
 
+    @Test
+    fun restoresProgressWhenAnotherEntryOnlyProvidesTheMediaStoreId() {
+        val store = VideoResumeProgressStore(context)
+        val scannedItem = video("same-video", 3_600_000, 10)
+        val queueItem = videoWithoutFile("same-video", 3_600_000, 10)
+
+        store.save(scannedItem, 755_000)
+
+        assertEquals(755_000L, store.resumePosition(queueItem))
+    }
+
+    @Test
+    fun restoresProgressWhenThePlayerOnlyProvidesTheMediaStoreId() {
+        val store = VideoResumeProgressStore(context)
+        val scannedItem = video("same-video", 3_600_000, 10)
+        val playerItem = videoWithoutFile("same-video", 3_600_000, 10)
+
+        store.save(playerItem, 200_000)
+
+        assertEquals(200_000L, store.resumePosition(scannedItem))
+    }
+
+    @Test
+    fun restoresProgressWhenThePlayerDoesNotExposeTheModificationTime() {
+        val store = VideoResumeProgressStore(context)
+        val scannedItem = video("same-video", 3_600_000, 10)
+        val playerItem = videoWithoutFileOrModificationTime("same-video", 3_600_000)
+
+        store.save(playerItem, 200_000)
+
+        assertEquals(200_000L, store.resumePosition(scannedItem))
+    }
+
     private fun video(id: String, duration: Long, modifiedDate: Long): MediaItem = MediaItem.Builder()
         .setMediaId("MediaStore:$id")
         .setMimeType("video/mp4")
@@ -96,4 +129,27 @@ class VideoResumeProgressStoreTest {
             })
             .build())
         .build()
+
+    private fun videoWithoutFile(id: String, duration: Long, modifiedDate: Long): MediaItem =
+        MediaItem.Builder()
+            .setMediaId("MediaStore:$id")
+            .setMimeType("video/mp4")
+            .setMediaMetadata(MediaMetadata.Builder()
+                .setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO)
+                .setDurationMs(duration)
+                .setExtras(Bundle().apply {
+                    putLong(EXTRA_MODIFIED_DATE, modifiedDate)
+                })
+                .build())
+            .build()
+
+    private fun videoWithoutFileOrModificationTime(id: String, duration: Long): MediaItem =
+        MediaItem.Builder()
+            .setMediaId("MediaStore:$id")
+            .setMimeType("video/mp4")
+            .setMediaMetadata(MediaMetadata.Builder()
+                .setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO)
+                .setDurationMs(duration)
+                .build())
+            .build()
 }
