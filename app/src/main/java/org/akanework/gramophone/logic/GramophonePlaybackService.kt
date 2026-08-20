@@ -687,18 +687,9 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var extras = intent?.extras
-        // Deserialize all extras to be able to log them.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            extras = extras?.deepCopy()
-        } else {
-            if (extras != null) {
-                for (i in extras.keySet()) {
-                    @Suppress("deprecation") extras.get(i)
-                }
-            }
-        }
-        Log.i(TAG, "onStartCommand(): $intent, ${extras?.toString()}")
+        val extraKeys = intent?.extras?.keySet()?.sorted()?.joinToString(",") ?: "none"
+        Log.i(TAG, "onStartCommand(): action=${intent?.action}, flags=$flags, " +
+            "startId=$startId, extraKeys=$extraKeys")
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -708,6 +699,9 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         mediaId: String,
         rating: Rating
     ): ListenableFuture<SessionResult> {
+        if (!controller.isTrusted) {
+            return Futures.immediateFuture(SessionResult(SessionError.ERROR_PERMISSION_DENIED))
+        }
         if (rating !is HeartRating) {
             return Futures.immediateFuture(SessionResult(
                 SessionError.ERROR_BAD_VALUE))
@@ -850,6 +844,7 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
         val availableSessionCommands =
             MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+        val canUseAppCommands = controller.isTrusted
         if (session.isMediaNotificationController(controller)
             || session.isAutoCompanionController(controller)
             || session.isAutomotiveController(controller)
@@ -869,27 +864,30 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         ) {
             handler.post { this.controller?.prepare() }
         }
-        availableSessionCommands.add(SessionCommand.COMMAND_CODE_SESSION_SET_RATING)
-        availableSessionCommands.add(SessionCommand(SERVICE_SET_TIMER, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QUERY_TIMER, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_GET_LYRICS, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_GET_AUDIO_FORMAT, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_SET_MEDIA_ITEMS_ATOMIC, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_NUM_QUEUES, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_INACTIVE_LIST, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_QUEUE_FOR_UI, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_LOAD_QUEUE, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_DEL, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_REORDER, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_PIN_QUEUE, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_UNPIN_QUEUE, Bundle.EMPTY))
-        availableSessionCommands.add(SessionCommand(SERVICE_QB_RENAME_QUEUE, Bundle.EMPTY))
+        if (canUseAppCommands) {
+            availableSessionCommands.add(SessionCommand.COMMAND_CODE_SESSION_SET_RATING)
+            availableSessionCommands.add(SessionCommand(SERVICE_SET_TIMER, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QUERY_TIMER, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_GET_LYRICS, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_GET_AUDIO_FORMAT, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_SET_MEDIA_ITEMS_ATOMIC, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_NUM_QUEUES, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_INACTIVE_LIST, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_GET_QUEUE_FOR_UI, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_LOAD_QUEUE, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_DEL, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_REORDER, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_PIN_QUEUE, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_UNPIN_QUEUE, Bundle.EMPTY))
+            availableSessionCommands.add(SessionCommand(SERVICE_QB_RENAME_QUEUE, Bundle.EMPTY))
+        }
         return builder.setAvailableSessionCommands(availableSessionCommands.build()).build()
     }
 
     override fun onPostConnect(session: MediaSession, controller: MediaSession.ControllerInfo) {
         Log.i(TAG, "onPostConnect(): $controller")
+        if (!controller.isTrusted) return
         session.sendCustomCommand(
             controller,
             SessionCommand(SERVICE_GET_LYRICS, Bundle.EMPTY),
@@ -1037,22 +1035,55 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
         customCommand: SessionCommand,
         args: Bundle
     ): ListenableFuture<SessionResult> {
+        if (!controller.isTrusted) {
+            return Futures.immediateFuture(SessionResult(SessionError.ERROR_PERMISSION_DENIED))
+        }
         if (customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY
             || customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_ATOMIC) {
             // This is the common entry point for home, category, search and queue list clicks.
             // Save before replacing the player timeline: after replacement the old position is no
             // longer reliably available from ExoPlayer callbacks.
+            val itemsBinder = customCommand.customExtras.getBinder("items")
+            val title = customCommand.customExtras.getString("title")
+            if (itemsBinder == null || title == null) {
+                DiagnosticStore.recordEvent(
+                    this,
+                    module = "session",
+                    event = "media_items_command_rejected",
+                    level = "WARN",
+                    errorCode = "missing_arguments"
+                )
+                return Futures.immediateFuture(SessionResult(SessionError.ERROR_BAD_VALUE))
+            }
+            val songList = runCatching { MediaItemList.getList(itemsBinder) }
+                .getOrElse {
+                    DiagnosticStore.recordEvent(
+                        this,
+                        module = "session",
+                        event = "media_items_command_rejected",
+                        level = "WARN",
+                        errorCode = "invalid_items_payload"
+                    )
+                    return Futures.immediateFuture(SessionResult(SessionError.ERROR_BAD_VALUE))
+                }
             saveCurrentVideoProgress()
-            val songList = MediaItemList.getList(
-                customCommand.customExtras.getBinder("items")!!)
             val position = customCommand.customExtras.getInt("position")
-            val title = customCommand.customExtras.getString("title")!!
             val seamless = customCommand.customAction == SERVICE_SET_MEDIA_ITEMS_SEAMLESSLY
             val itemsFuture = Futures.transform(
                 expandAndMapMediaItems(songList),
                 { expanded ->
                     val expandedSongList = expanded.mediaItems
                     val selectedIndex = expanded.startIndex ?: position
+                    if (selectedIndex !in expandedSongList.indices) {
+                        DiagnosticStore.recordEvent(
+                            this,
+                            module = "session",
+                            event = "media_items_command_rejected",
+                            level = "WARN",
+                            errorCode = "invalid_start_index"
+                        )
+                        return@transform SessionResult(SessionError.ERROR_BAD_VALUE)
+                    }
                     val selectedItem = expandedSongList.getOrNull(selectedIndex)
                     val resumePositionMs = selectedItem
                         ?.takeUnless { it.mediaId == endedWorkaroundPlayer?.currentMediaItem?.mediaId }

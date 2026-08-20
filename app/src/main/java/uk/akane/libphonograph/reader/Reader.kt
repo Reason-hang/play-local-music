@@ -393,7 +393,9 @@ internal object Reader {
             val modifiedDateColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
 
             while (it.moveToNext()) {
-                val path = it.getString(pathColumn)!!
+                // DATA may be null for scoped-storage rows. Such rows cannot be opened through
+                // the legacy file-based pipeline, so skip them instead of crashing the scan.
+                val path = it.getStringOrNullIfThrow(pathColumn) ?: continue
                 val duration =
                     it.getLongOrNullIfThrow(durationColumn)?.let { if (it >= 0) it else null }
                 val pathFile = File(path)
@@ -409,7 +411,7 @@ internal object Reader {
                 if (skip && idMap == null && pathMap == null) continue
                 val id = it.getLong(idColumn)
                 if (MediaIdentity.keys("MediaStore:$id", path).any(hiddenMediaKeys::contains)) continue
-                val title = it.getString(titleColumn) ?: path ?: it.getString(fileName)!!
+                val title = it.getStringOrNullIfThrow(titleColumn) ?: path
                 val artist: String?
                 val hasNoMetadata: Boolean
                 it.getStringOrNullIfThrow(artistColumn).let {

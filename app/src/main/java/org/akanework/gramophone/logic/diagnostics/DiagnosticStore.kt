@@ -16,6 +16,8 @@ import androidx.media3.common.util.Log
 import org.akanework.gramophone.BuildConfig
 import org.json.JSONObject
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -33,6 +35,9 @@ object DiagnosticStore {
     private const val MAX_SUMMARY_EVENT_CHARS = 1024
     private val localPathRegex = Regex("/(?:storage|sdcard|data|mnt|Users)/[^\\s\\n]*")
     private val contentUriRegex = Regex("content://[^\\s\\n\\\"\\\\]+")
+    private val eventExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "diagnostic-events").apply { isDaemon = true }
+    }
 
     data class CrashRecord(val file: File, val timestamp: Long)
 
@@ -44,8 +49,8 @@ object DiagnosticStore {
         errorCode: String? = null,
         details: Map<String, String> = emptyMap()
     ) {
-        runCatching {
-            val line = JSONObject().apply {
+        val line = runCatching {
+            JSONObject().apply {
                 put("time", System.currentTimeMillis())
                 put("level", level)
                 put("module", module)
@@ -53,18 +58,14 @@ object DiagnosticStore {
                 put("errorCode", errorCode?.let(::sanitize))
                 put("details", JSONObject(details.mapValues { sanitize(it.value) }))
             }.toString()
-            synchronized(this) {
-                val eventFile = File(diagnosticDirectory(context), EVENT_FILE)
-                val lines = eventFile.takeIf(File::exists)?.readLines().orEmpty()
-                    .plus(line)
-                    .takeLast(MAX_EVENTS)
-                var content = lines.joinToString(separator = "\n", postfix = "\n")
-                while (content.toByteArray().size > MAX_EVENT_BYTES && lines.isNotEmpty()) {
-                    content = content.substringAfter("\n", missingDelimiterValue = "")
-                }
-                writeAtomically(eventFile, content)
-            }
-        }.onFailure { Log.w(TAG, "Unable to save a diagnostic event", it) }
+        }.getOrElse {
+            Log.w(TAG, "Unable to build a diagnostic event", it)
+            return
+        }
+        eventExecutor.execute {
+            runCatching { appendEventLine(context.applicationContext, line) }
+                .onFailure { Log.w(TAG, "Unable to save a diagnostic event", it) }
+        }
     }
 
     fun recordCrash(context: Context, threadName: String, throwable: Throwable) {
@@ -84,7 +85,7 @@ object DiagnosticStore {
             val crashFile = File(diagnosticDirectory(context), "crash_$now.txt")
             writeAtomically(crashFile, summary)
             trimCrashFiles(context)
-            recordEvent(
+            recordEventNow(
                 context = context,
                 module = "crash",
                 event = "uncaught_exception",
@@ -101,32 +102,39 @@ object DiagnosticStore {
         ?.sortedByDescending(CrashRecord::timestamp)
         .orEmpty()
 
-    fun readCrash(record: CrashRecord): String = record.file.readText().take(MAX_CRASH_BYTES)
+    fun readCrash(record: CrashRecord): String = runCatching {
+        record.file.readText().take(MAX_CRASH_BYTES)
+    }.getOrDefault("崩溃记录已被清理或无法读取。")
 
-    fun copySummary(context: Context): String = buildString {
-        appendLine("本地听歌诊断摘要")
-        appendLine("version=${BuildConfig.MY_VERSION_NAME}")
-        appendLine("device=${Build.BRAND} ${Build.MODEL}")
-        appendLine("sdk=${Build.VERSION.SDK_INT}")
-        crashRecords(context).firstOrNull()?.let { record ->
-            appendLine("latestCrash=${record.timestamp}")
-            append(sanitize(readCrash(record)).take(12 * 1024))
-        } ?: appendLine("latestCrash=none")
-        appendLine()
-        appendLine("recentEvents:")
-        val eventFile = File(diagnosticDirectory(context), EVENT_FILE)
-        eventFile.takeIf(File::exists)?.readLines()?.takeLast(20)?.forEach { line ->
-            appendLine(sanitize(line.replace("\\/", "/")).take(MAX_SUMMARY_EVENT_CHARS))
-        } ?: appendLine("none")
+    fun copySummary(context: Context): String {
+        awaitPendingEvents()
+        return buildString {
+            appendLine("本地听歌诊断摘要")
+            appendLine("version=${BuildConfig.MY_VERSION_NAME}")
+            appendLine("device=${Build.BRAND} ${Build.MODEL}")
+            appendLine("sdk=${Build.VERSION.SDK_INT}")
+            crashRecords(context).firstOrNull()?.let { record ->
+                appendLine("latestCrash=${record.timestamp}")
+                append(sanitize(readCrash(record)).take(12 * 1024))
+            } ?: appendLine("latestCrash=none")
+            appendLine()
+            appendLine("recentEvents:")
+            val eventFile = File(diagnosticDirectory(context), EVENT_FILE)
+            eventFile.takeIf(File::exists)?.readLines()?.takeLast(20)?.forEach { line ->
+                appendLine(sanitize(line.replace("\\/", "/")).take(MAX_SUMMARY_EVENT_CHARS))
+            } ?: appendLine("none")
+        }
     }
 
     fun clear(context: Context) {
+        awaitPendingEvents()
         synchronized(this) {
             diagnosticDirectory(context).listFiles()?.forEach(File::delete)
         }
     }
 
     fun export(context: Context): File {
+        awaitPendingEvents()
         val directory = diagnosticDirectory(context)
         val export = File(context.cacheDir, "diagnostic-export-${System.currentTimeMillis()}.zip")
         ZipOutputStream(export.outputStream().buffered()).use { zip ->
@@ -152,6 +160,45 @@ object DiagnosticStore {
 
     private fun diagnosticDirectory(context: Context): File =
         File(context.filesDir, DIRECTORY).also(File::mkdirs)
+
+    private fun recordEventNow(
+        context: Context,
+        module: String,
+        event: String,
+        level: String,
+        errorCode: String?,
+        details: Map<String, String>
+    ) {
+        val line = JSONObject().apply {
+            put("time", System.currentTimeMillis())
+            put("level", level)
+            put("module", module)
+            put("event", event)
+            put("errorCode", errorCode?.let(::sanitize))
+            put("details", JSONObject(details.mapValues { sanitize(it.value) }))
+        }.toString()
+        appendEventLine(context.applicationContext, line)
+    }
+
+    private fun appendEventLine(context: Context, line: String) {
+        synchronized(this) {
+            val eventFile = File(diagnosticDirectory(context), EVENT_FILE)
+            val lines = eventFile.takeIf(File::exists)?.readLines().orEmpty()
+                .plus(line)
+                .takeLast(MAX_EVENTS)
+            var content = lines.joinToString(separator = "\n", postfix = "\n")
+            while (content.toByteArray().size > MAX_EVENT_BYTES && lines.isNotEmpty()) {
+                content = content.substringAfter("\n", missingDelimiterValue = "")
+            }
+            writeAtomically(eventFile, content)
+        }
+    }
+
+    private fun awaitPendingEvents() {
+        runCatching {
+            eventExecutor.submit { }.get(5, TimeUnit.SECONDS)
+        }.onFailure { Log.w(TAG, "Unable to flush diagnostic events", it) }
+    }
 
     private fun trimCrashFiles(context: Context) {
         crashRecords(context).drop(MAX_CRASH_FILES).forEach { it.file.delete() }

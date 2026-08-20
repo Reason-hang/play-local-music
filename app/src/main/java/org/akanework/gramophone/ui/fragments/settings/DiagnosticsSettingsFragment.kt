@@ -19,7 +19,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,10 +37,16 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_diagnostics, rootKey)
         findPreference<Preference>("diagnostics_copy")?.setOnPreferenceClickListener {
-            val text = DiagnosticStore.copySummary(requireContext().applicationContext)
-            val clipboard = requireContext().getSystemService(ClipboardManager::class.java)
-            clipboard.setPrimaryClip(ClipData.newPlainText("本地听歌诊断摘要", text))
-            Toast.makeText(requireContext(), R.string.diagnostics_copy_done, Toast.LENGTH_SHORT).show()
+            val appContext = requireContext().applicationContext
+            viewLifecycleOwner.lifecycleScope.launch {
+                val text = withContext(Dispatchers.IO) {
+                    DiagnosticStore.copySummary(appContext)
+                }
+                if (!isAdded) return@launch
+                val clipboard = requireContext().getSystemService(ClipboardManager::class.java)
+                clipboard.setPrimaryClip(ClipData.newPlainText("本地听歌诊断摘要", text))
+                Toast.makeText(requireContext(), R.string.diagnostics_copy_done, Toast.LENGTH_SHORT).show()
+            }
             true
         }
         findPreference<Preference>("diagnostics_export")?.setOnPreferenceClickListener {
@@ -53,8 +58,13 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                 .setMessage(R.string.diagnostics_clear_confirm)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.diagnostics_clear) { _, _ ->
-                    DiagnosticStore.clear(requireContext())
-                    refreshCrashRecords()
+                    val appContext = requireContext().applicationContext
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                        DiagnosticStore.clear(appContext)
+                        withContext(Dispatchers.Main) {
+                            if (isAdded) refreshCrashRecords()
+                        }
+                    }
                 }
                 .show()
             true
@@ -68,11 +78,13 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
 
     private fun refreshCrashRecords() {
         val category = findPreference<PreferenceCategory>("diagnostics_crashes") ?: return
+        val appContext = requireContext().applicationContext
         category.removeAll()
         viewLifecycleOwner.lifecycleScope.launch {
             val records = withContext(Dispatchers.IO) {
-                DiagnosticStore.crashRecords(requireContext().applicationContext)
+                DiagnosticStore.crashRecords(appContext)
             }
+            if (!isAdded) return@launch
             if (records.isEmpty()) {
                 category.addPreference(Preference(requireContext()).apply {
                     isSelectable = false
@@ -85,11 +97,17 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                     title = DateFormat.getDateTimeInstance().format(Date(record.timestamp))
                     summary = getString(R.string.diagnostics_view_crash)
                     setOnPreferenceClickListener {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(title)
-                            .setMessage(DiagnosticStore.readCrash(record))
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show()
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val crash = withContext(Dispatchers.IO) {
+                                DiagnosticStore.readCrash(record)
+                            }
+                            if (!isAdded) return@launch
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(title)
+                                .setMessage(crash)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show()
+                        }
                         true
                     }
                 })
@@ -99,9 +117,10 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
 
     private fun exportDiagnostics() {
         val appContext = requireContext().applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             runCatching { DiagnosticStore.export(appContext) }
                 .onSuccess { file -> withContext(Dispatchers.Main) {
+                    if (!isAdded) return@withContext
                     val uri = FileProvider.getUriForFile(
                         appContext,
                         "${appContext.packageName}.fileProvider",
@@ -114,7 +133,9 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                     }, getString(R.string.diagnostics_export)))
                 } }
                 .onFailure { withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), R.string.diagnostics_export_failed, Toast.LENGTH_LONG).show()
+                    if (isAdded) {
+                        Toast.makeText(requireContext(), R.string.diagnostics_export_failed, Toast.LENGTH_LONG).show()
+                    }
                 } }
         }
     }

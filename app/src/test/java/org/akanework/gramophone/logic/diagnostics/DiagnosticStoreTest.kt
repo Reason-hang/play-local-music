@@ -39,6 +39,7 @@ class DiagnosticStoreTest {
 
         assertTrue(contents.contains("<redacted-path>"))
         assertFalse(contents.contains("/storage/emulated/0/Music/private.mp4"))
+        assertTrue(DiagnosticStore.copySummary(context).contains("uncaught_exception"))
     }
 
     @Test
