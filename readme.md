@@ -1,6 +1,6 @@
 # 本地听歌
 
-状态：SelfBuilt 本地播放器；当前版本：1.7.1。
+状态：SelfBuilt 本地播放器；当前版本：1.7.2。
 
 本地听歌基于 Gramophone 二次开发，仅提供本地媒体库播放：MP3 与包含 AAC 音轨的 MP4。MP4 可在播放页点击画面进入全屏播放；锁屏、通知栏、蓝牙、队列与后台播放沿用既有 Media3 `MediaSession` 服务。
 
@@ -19,8 +19,8 @@
 
 | 安装包 | 应用 ID | 用途 |
 | --- | --- | --- |
-| `outputs/本地听歌-1.7.1.apk` | `org.akanework.gramophone.debug` | 覆盖此前的“本地听歌”安装。 |
-| `outputs/多听课程-1.7.1.apk` | `org.akanework.gramophone.course.debug` | 白底居中的橙色耳机图标、火焰橙主题，可与“本地听歌”同时安装，数据相互隔离。 |
+| `outputs/本地听歌-1.7.2.apk` | `org.akanework.gramophone.debug` | 覆盖此前的“本地听歌”安装。 |
+| `outputs/多听课程-1.7.2.apk` | `org.akanework.gramophone.course.debug` | 白底居中的橙色耳机图标、火焰橙主题，可与“本地听歌”同时安装，数据相互隔离。 |
 
 两个 APK 文件名均不含 `debug`，但在未提供正式 keystore 前仍是 SelfBuilt 签名，不能作为商店发布包。
 
