@@ -41,9 +41,11 @@
 - 遵守 `prefers-reduced-motion`：关闭位移、缩放和复杂过渡，只保留必要状态变化。
 - 所有交互控件触控区域不低于约 44dp。
 
-## Android 原生映射（1.7.3）
+## Android 原生映射（1.7.4）
 
 - 原生 Compose 主题使用构建变体固定色板：本地听歌 `#FDB833`，多听课程 `#FF4E00`；不再使用 Android 12+ 壁纸动态色覆盖品牌色。
 - 首页紧凑列表和普通列表保留适配器绑定锚点，但副标题设为 `gone`，主标题最多三行并在超出时省略。
 - 多听课程启动图标使用白底、居中、缩小后的橙色耳机资产；应用图标与启动页复用同一资产。
 - 页面滑入/滑出继续使用现有 150ms 低功耗动效；不新增持续动画，不触碰播放器、MediaSession、队列或后台服务。
+- `NativeVisualShell.kt` 按本 Demo 的状态拆分为媒体库首页、播放页、媒体库整理和诊断与日志；`VideoPlayerActivity` 负责全屏视频容器和返回手势。
+- `MainActivity` 仅挂载一个 Compose 根视图并隐藏旧可见 XML 容器；旧 Fragment 和 PlayerBottomSheet 保留为兼容层，避免改变既有业务生命周期。

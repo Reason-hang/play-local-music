@@ -274,6 +274,16 @@
 - **版本**：versionCode 38、versionName `1.7.3`。构建两个 `nonMinifiedRelease` 变体并将交付文件重命名为不含 `debug` 的中文版本名；若未配置正式 keystore，交付说明必须标注签名边界。
 - **验收**：必须分别检查两变体主题色、三行标题、无副标题、Logo 资源、包名共存、APK 元数据、单元测试、Lint、签名和离线权限；未连接 Redmi 真机时不虚构锁屏、全屏和 HyperOS 结论。
 
+### D-034 1.7.4 以 v0.1 Demo 为基准的原生 Compose 逐页重构
+
+- **触发原因**：1.7.3 虽已调整主题色和列表资源，但用户安装后仍看到旧 XML/Fragment 页面，视觉 Demo 与实际 APK 没有形成一一对应的运行时闭环。
+- **事实确认**：`design-v0/本地听歌-界面视觉v0.1.html` 明确定义媒体库首页、播放页、全屏入口、媒体库整理和诊断与日志五个状态；旧 `activity_main.xml` 通过 `ViewPagerFragment` 承载旧页面。若仅继续改颜色或资源，无法达到“视觉重做”的目标。
+- **方案对比**：A. 继续局部修改旧 XML，改动小但页面结构和 Demo 仍分叉；B. 新建完整第二套播放器与服务，视觉自由但会破坏 MediaSession、队列、锁屏和续播边界；C. 在现有 `MainActivity` 中挂载单一 Compose 视觉壳，隐藏旧可见容器，所有播放/扫描/诊断动作仍调用既有模型和服务。采用 C。
+- **实现边界**：新增 `NativeVisualShell.kt`，把 Demo 的首页、播放页、媒体库整理、诊断页映射为原生 Compose；`VideoPlayerActivity` 改为 Compose 容器内复用同一个 Media3 `PlayerView`；不创建第二播放器，不迁移 `GramophonePlaybackService`、`MediaSession`、队列、锁屏和后台逻辑。
+- **版本**：versionCode 39、versionName `1.7.4`。两个变体均构建 `nonMinifiedRelease`，交付文件为 `outputs/本地听歌-1.7.4.apk` 与 `outputs/多听课程-1.7.4.apk`。
+- **验证**：双变体 Kotlin 编译通过后，再执行双变体构建、单测、Lint、APK 元数据/权限/ZIP 完整性检查；未连接 Redmi K80 Pro 时，真机视频画面、锁屏、蓝牙和 HyperOS 仍标记为待验收。
+- **回滚**：删除 Compose 宿主挂载并恢复旧 XML 可见性即可回到 1.7.3；播放服务和应用私有进度数据不受影响。
+
 ## 当前风险与回滚
 
-最重要的未验证项是 Redmi K80 Pro/HyperOS 上两个应用的实际并存、MP4 画面、锁屏后台、异常回收后的独立视频进度，以及外放强音的主观响度/破音边界；其次是大媒体库的 MP4 探测耗时和正式签名升级。任何阻断问题先保留诊断摘要、最小化复现，再分别按 D-030 的进度入口或 D-031 的外放开关回滚，始终保留 MP3 基线。
+最重要的未验证项是 Redmi K80 Pro/HyperOS 上两个应用的实际并存、Compose 页面触控与返回、MP4 画面、锁屏后台、异常回收后的独立视频进度，以及外放强音的主观响度/破音边界；其次是大媒体库的 MP4 探测耗时和正式签名升级。任何阻断问题先保留诊断摘要、最小化复现，再按 D-034 回滚视觉壳或按 D-030/D-031 回滚播放进度与外放开关，始终保留 MP3 基线。
