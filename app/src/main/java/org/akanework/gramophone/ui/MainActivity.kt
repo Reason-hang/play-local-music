@@ -39,7 +39,6 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.Choreographer
 import android.view.SearchEvent
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -64,9 +63,6 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.Log
 import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.preference.PreferenceManager
 import coil3.imageLoader
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -236,22 +232,6 @@ class MainActivity : BaseActivity() {
             })
         }
         playerBottomSheet = findViewById(R.id.player_layout)
-
-        // The approved v0 visual system is now the native application shell. The legacy
-        // fragments remain instantiated as a compatibility backstop for existing contracts,
-        // but are not rendered over the Compose surface.
-        findViewById<View>(R.id.container).visibility = View.GONE
-        playerBottomSheet.visibility = View.GONE
-        findViewById<ViewGroup>(R.id.rootView).addView(ComposeView(this).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val pureDark = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                    .getBoolean("pureDark", false)
-                GramophoneTheme(pureDark = pureDark) {
-                    NativeVisualContent()
-                }
-            }
-        }, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
         // Check all permissions.
         if (!hasAudioPermission() || (hasScopedStorageWithMediaTypes() && !hasVideoPermission())) {
