@@ -343,14 +343,7 @@
         <item>1.7x</item>
         <item>2x</item>
     </string-array>
-    <string-array name="exo_controls_playback_speeds" tools:override="true">
-        <item>0.75x</item>
-        <item>1x</item>
-        <item>1.3x</item>
-        <item>1.5x</item>
-        <item>1.7x</item>
-        <item>2x</item>
-    </string-array>
+    <string name="video_playback_speed_short">%.2g×</string>
     <!-- Used in playback speed dialog to control speed / tempo, next to slider -->
     <string name="tempo">Tempo</string>
     <!-- Used in playback speed dialog to control pitch, next to slider -->

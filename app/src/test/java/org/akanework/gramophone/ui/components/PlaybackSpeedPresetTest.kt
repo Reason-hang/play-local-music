@@ -11,6 +11,7 @@ package org.akanework.gramophone.ui.components
 
 import org.akanework.gramophone.R
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -25,6 +26,20 @@ class PlaybackSpeedPresetTest {
             RuntimeEnvironment.getApplication()
                 .resources
                 .getStringArray(R.array.playback_speed_presets)
+        )
+    }
+
+    @Test
+    fun productLabelsAndPolicyHaveTheSameOneToOneContract() {
+        val labels = RuntimeEnvironment.getApplication()
+            .resources
+            .getStringArray(R.array.playback_speed_presets)
+
+        assertEquals(PlaybackSpeedPolicy.presets.size, labels.size)
+        assertArrayEquals(
+            floatArrayOf(0.75f, 1f, 1.3f, 1.5f, 1.7f, 2f),
+            PlaybackSpeedPolicy.presets,
+            0f
         )
     }
 }

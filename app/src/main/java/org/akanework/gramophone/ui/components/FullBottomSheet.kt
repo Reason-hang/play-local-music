@@ -47,7 +47,6 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ListView
-import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -58,7 +57,6 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
 import androidx.core.animation.doOnEnd
-import androidx.core.content.edit
 import androidx.core.graphics.Insets
 import androidx.core.graphics.TypefaceCompat
 import androidx.core.os.BundleCompat
@@ -68,7 +66,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.postOnAnimationDelayed
-import androidx.core.widget.NestedScrollView
 import androidx.core.widget.TextViewCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModel
@@ -76,7 +73,6 @@ import androidx.media3.common.C
 import androidx.media3.common.HeartRating
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.Log
 import androidx.media3.session.MediaBrowser
@@ -95,12 +91,10 @@ import coil3.request.error
 import coil3.size.Scale
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.slider.Slider
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -505,8 +499,7 @@ class FullBottomSheet
 
         bottomSheetPlaybackSpeedButton.setOnClickListener {
             ViewCompat.performHapticFeedback(it, HapticFeedbackConstantsCompat.CONTEXT_CLICK)
-            if (instance != null)
-                showPlaybackSpeedDialog()
+            instance?.let { player -> PlaybackSpeedDialog.show(context, player, prefs) }
         }
 
         bottomSheetFavoriteButton.addOnCheckedChangeListener(this)
@@ -732,155 +725,6 @@ class FullBottomSheet
         if (key == null || key == "cookie_cover") {
             bottomSheetFullCover.setClip(prefs.getBooleanStrict("cookie_cover", false))
         }
-    }
-
-    private fun showPlaybackSpeedDialog() {
-        val context = wrappedContext ?: context
-        val initialPlaybackParameters = instance!!.playbackParameters
-        val wantsToBeLocked = prefs.getBoolean("playback_tempo_pitch_locked", false)
-        val isLocked =
-            initialPlaybackParameters.pitch == initialPlaybackParameters.speed && wantsToBeLocked
-
-        val playbackSpeeds = floatArrayOf(0.75f, 1f, 1.3f, 1.5f, 1.7f, 2f)
-        val playbackSpeedLabels = context.resources.getStringArray(R.array.playback_speed_presets)
-        var selectedSpeed = initialPlaybackParameters.speed
-        val playbackSpeedRadioIds = IntArray(playbackSpeeds.size)
-        val tempoText = TextView(context).apply {
-            text = context.getString(
-                R.string.tempo_pitch_value,
-                context.getString(R.string.tempo),
-                initialPlaybackParameters.speed
-            )
-            gravity = Gravity.CENTER
-            textSize = 16f
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { layoutParams = it }
-        }
-
-        val tempoOptions = RadioGroup(context).apply {
-            orientation = RadioGroup.VERTICAL
-            playbackSpeeds.forEachIndexed { index, speed ->
-                addView(MaterialRadioButton(context).apply {
-                    id = View.generateViewId().also { playbackSpeedRadioIds[index] = it }
-                    text = playbackSpeedLabels[index]
-                    isChecked = initialPlaybackParameters.speed == speed
-                })
-            }
-        }
-
-        val pitchSlider = Slider(context).apply {
-            valueFrom = 0.25f
-            valueTo = 4.0f
-            stepSize = 0.01f
-            value = initialPlaybackParameters.pitch.coerceIn(0.25f, 4.0f)
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { layoutParams = it }
-        }
-
-        val pitchText = TextView(context).apply {
-            text = context.getString(
-                R.string.tempo_pitch_value,
-                context.getString(R.string.pitch),
-                pitchSlider.value
-            )
-            gravity = Gravity.CENTER
-            textSize = 16f
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { layoutParams = it }
-        }
-
-        val lockCheckbox = MaterialCheckBox(context).apply {
-            text = context.getString(R.string.lock_tempo_pitch)
-            isChecked = isLocked
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).also { layoutParams = it }
-        }
-
-        pitchSlider.isEnabled = !isLocked
-        pitchText.isEnabled = !isLocked
-
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(
-                48.dpToPx(context), 16.dpToPx(context),
-                48.dpToPx(context), 0
-            )
-            addView(tempoText)
-            addView(tempoOptions)
-            addView(pitchText)
-            addView(pitchSlider)
-            addView(lockCheckbox)
-        }
-
-        pitchSlider.addOnChangeListener { _, value, fromUser ->
-            pitchText.text = context.getString(
-                R.string.tempo_pitch_value,
-                context.getString(R.string.pitch),
-                value
-            )
-            if (fromUser) {
-                instance?.playbackParameters =
-                    PlaybackParameters(selectedSpeed, pitchSlider.value)
-            }
-        }
-
-        tempoOptions.setOnCheckedChangeListener { _, checkedId ->
-            val index = playbackSpeedRadioIds.indexOf(checkedId)
-            if (index == -1) return@setOnCheckedChangeListener
-            selectedSpeed = playbackSpeeds[index]
-            if (lockCheckbox.isChecked) {
-                pitchSlider.value = selectedSpeed
-            }
-            tempoText.text = context.getString(
-                R.string.tempo_pitch_value,
-                context.getString(R.string.tempo),
-                selectedSpeed
-            )
-            instance?.playbackParameters =
-                PlaybackParameters(selectedSpeed, pitchSlider.value)
-        }
-
-        lockCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            pitchSlider.isEnabled = !isChecked
-            pitchText.isEnabled = !isChecked
-            if (isChecked) {
-                pitchSlider.value = selectedSpeed
-                instance?.playbackParameters =
-                    PlaybackParameters(selectedSpeed, pitchSlider.value)
-            }
-        }
-
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.playback_speed)
-            .setView(NestedScrollView(context).apply { addView(container) })
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                prefs.edit {
-                    putBoolean("playback_tempo_pitch_locked", lockCheckbox.isChecked)
-                }
-            }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-                instance?.playbackParameters = initialPlaybackParameters
-                if (wantsToBeLocked != isLocked) { // if external app changed speed/pitch.
-                    prefs.edit {
-                        putBoolean("playback_tempo_pitch_locked", false)
-                    }
-                }
-            }
-            .setNeutralButton(R.string.reset) { _, _ ->
-                prefs.edit {
-                    putBoolean("playback_tempo_pitch_locked", false)
-                }
-                instance?.playbackParameters = PlaybackParameters(1f, 1f)
-            }
-            .show()
     }
 
     fun onStop() {
