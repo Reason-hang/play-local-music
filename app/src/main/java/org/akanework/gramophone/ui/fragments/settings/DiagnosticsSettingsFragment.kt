@@ -9,11 +9,14 @@
 
 package org.akanework.gramophone.ui.fragments.settings
 
-import android.content.Intent
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -43,9 +46,7 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                     DiagnosticStore.copySummary(appContext)
                 }
                 if (!isAdded) return@launch
-                val clipboard = requireContext().getSystemService(ClipboardManager::class.java)
-                clipboard.setPrimaryClip(ClipData.newPlainText("本地听歌诊断摘要", text))
-                Toast.makeText(requireContext(), R.string.diagnostics_copy_done, Toast.LENGTH_SHORT).show()
+                copyDiagnosticText(requireContext(), text)
             }
             true
         }
@@ -102,11 +103,8 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                                 DiagnosticStore.readCrash(record)
                             }
                             if (!isAdded) return@launch
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setTitle(title)
-                                .setMessage(crash)
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show()
+                            val dialogContext = requireContext()
+                            showCrashDialog(dialogContext, title, crash)
                         }
                         true
                     }
@@ -139,4 +137,39 @@ class DiagnosticsSettingsFragment : BasePreferenceFragment() {
                 } }
         }
     }
+}
+
+internal fun createCrashDialog(
+    context: Context,
+    title: CharSequence?,
+    crash: String,
+): AlertDialog = MaterialAlertDialogBuilder(context)
+    .setTitle(title)
+    .setMessage(crash)
+    .setPositiveButton(android.R.string.ok, null)
+    .setNegativeButton(R.string.diagnostics_copy_crash) { _, _ ->
+        copyDiagnosticText(context, crash)
+    }
+    .create()
+
+internal fun showCrashDialog(
+    context: Context,
+    title: CharSequence?,
+    crash: String,
+): AlertDialog = createCrashDialog(context, title, crash).also { dialog ->
+    dialog.show()
+    dialog.findViewById<TextView>(android.R.id.message)
+        ?.let(::makeDiagnosticTextSelectable)
+}
+
+internal fun copyDiagnosticText(context: Context, text: String) {
+    val clipboard = context.getSystemService(ClipboardManager::class.java)
+    clipboard.setPrimaryClip(
+        ClipData.newPlainText(context.getString(R.string.diagnostics_copy), text)
+    )
+    Toast.makeText(context, R.string.diagnostics_copy_done, Toast.LENGTH_SHORT).show()
+}
+
+internal fun makeDiagnosticTextSelectable(textView: TextView) {
+    textView.setTextIsSelectable(true)
 }
