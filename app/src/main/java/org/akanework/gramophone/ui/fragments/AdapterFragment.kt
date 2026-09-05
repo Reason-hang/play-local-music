@@ -49,6 +49,7 @@ import org.akanework.gramophone.ui.adapters.GenreAdapter
 import org.akanework.gramophone.ui.adapters.PlaylistAdapter
 import org.akanework.gramophone.ui.adapters.SongAdapter
 import org.akanework.gramophone.ui.adapters.Sorter
+import uk.akane.libphonograph.dynamicitem.Favorite
 
 /**
  * AdapterFragment:
@@ -123,11 +124,16 @@ class AdapterFragment : BaseFragment(null) {
         return when (id) {
             R.id.songs -> SongAdapter(this, qTitle, songList = combine(
                 requireContext().gramophoneApplication.reader.songListFlow,
-                requireContext().gramophoneApplication.localLibraryManager.state
-            ) { songs, library ->
+                requireContext().gramophoneApplication.localLibraryManager.state,
+                requireContext().gramophoneApplication.reader.playlistListFlow
+            ) { songs, library, playlists ->
+                val favoriteIds = playlists.firstOrNull { it is Favorite }?.songList
+                    ?.mapTo(mutableSetOf()) { it.mediaId }
+                    .orEmpty()
                 when (library.activeFilter) {
                     LocalLibraryManager.FILTER_MP3 -> songs.filter { it.getFile()?.extension.equals("mp3", true) }
                     LocalLibraryManager.FILTER_MP4 -> songs.filter { it.getFile()?.extension.equals("mp4", true) }
+                    LocalLibraryManager.FILTER_FAVORITES -> songs.filter { favoriteIds.contains(it.mediaId) }
                     else -> library.activeFilter.removePrefix("category:").takeIf {
                         library.activeFilter.startsWith("category:")
                     }?.let { category ->

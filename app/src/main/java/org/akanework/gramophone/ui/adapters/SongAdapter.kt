@@ -25,13 +25,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ShareCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.getBooleanStrict
@@ -50,6 +54,8 @@ import uk.akane.libphonograph.items.albumId
 import uk.akane.libphonograph.items.albumYear
 import uk.akane.libphonograph.items.artistId
 import uk.akane.libphonograph.items.modifiedDate
+import uk.akane.libphonograph.dynamicitem.Favorite
+import uk.akane.libphonograph.manipulator.PlaylistSerializer.Entry
 import java.io.File
 import java.util.GregorianCalendar
 
@@ -70,7 +76,10 @@ class SongAdapter(
 ) : BaseAdapter<MediaItem>
     (
     fragment,
-    liveData = songList,
+    liveData = songList.combine(
+        (fragment?.requireContext() ?: fallbackContext!!).gramophoneApplication
+            .localLibraryManager.state
+    ) { songs, _ -> songs },
     sortHelper = MediaItemHelper,
     naturalOrderHelper = helper,
     initialSortType =
@@ -94,6 +103,22 @@ class SongAdapter(
 
     init {
         lateInit()
+    }
+
+    private var favoriteMediaIds: Set<String> = emptySet()
+
+    init {
+        fragment?.viewLifecycleOwner?.lifecycleScope?.launch {
+            mainActivity.reader.playlistListFlow.collectLatest { playlists ->
+                val next = playlists.firstOrNull { it is Favorite }?.songList
+                    ?.mapTo(mutableSetOf()) { it.mediaId }
+                    .orEmpty()
+                if (favoriteMediaIds != next) {
+                    favoriteMediaIds = next
+                    notifyDataSetChanged()
+                }
+            }
+        }
     }
 
     fun getSongList() = list?.second ?: emptyList()
@@ -208,6 +233,36 @@ class SongAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
         holder.subTitle.visibility = View.GONE
+        holder.favoriteButton?.let { button ->
+            val canFavorite = isSubFragment != R.id.songs
+            button.visibility = if (canFavorite) View.VISIBLE else View.GONE
+            if (canFavorite) {
+                val item = getSongList()[position]
+                val isFavorite = isFavorite(item)
+                button.isChecked = isFavorite
+                button.contentDescription = context.getString(
+                    if (isFavorite) R.string.unfavorite else R.string.favorite
+                )
+                button.setOnClickListener {
+                    Entry.ofMediaItem(item)?.let { entry ->
+                        mainActivity.markIsFavoriteStatus(listOf(entry), !isFavorite(item))
+                    }
+                }
+            } else {
+                button.setOnClickListener(null)
+            }
+        }
+    }
+
+    private fun isFavorite(item: MediaItem): Boolean = favoriteMediaIds.contains(item.mediaId)
+
+    override fun isUserPinned(item: MediaItem): Boolean {
+        return mainActivity.gramophoneApplication.localLibraryManager.isPinned(item)
+    }
+
+    override fun getUserPinnedOrder(item: MediaItem): Long {
+        return mainActivity.gramophoneApplication.localLibraryManager.pinnedOrder(item)
+            ?: Long.MAX_VALUE
     }
 
     override fun virtualTitleOf(item: MediaItem): String {
@@ -243,9 +298,20 @@ class SongAdapter(
 
     override fun onMenu(item: MediaItem, popupMenu: PopupMenu) {
         popupMenu.inflate(R.menu.more_menu_song)
+        popupMenu.menu.findItem(R.id.toggle_pin).title = context.getString(
+            if (mainActivity.gramophoneApplication.localLibraryManager.isPinned(item))
+                R.string.unpin else R.string.pin
+        )
 
         popupMenu.setOnMenuItemClickListener { it1 ->
             when (it1.itemId) {
+                R.id.toggle_pin -> {
+                    val manager = mainActivity.gramophoneApplication.localLibraryManager
+                    if (manager.isPinned(item)) manager.unpin(listOf(item))
+                    else manager.pin(listOf(item))
+                    true
+                }
+
                 R.id.play_next -> {
                     val mediaController = mainActivity.getPlayer()
                     mediaController?.addMediaItem(

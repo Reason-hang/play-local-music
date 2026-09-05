@@ -145,14 +145,20 @@ abstract class BaseAdapter<T : Any>(
                 l to ArrayList(l).apply {
                     val (cmp, reverseFirst) = sorter.getComparator(st)
                     if (reverseFirst) reverse()
-                    if (cmp != null) {
-                        sortWith { o1, o2 ->
-                            if (isPinned(o1) && !isPinned(o2)) -1
-                            else if (!isPinned(o1) && isPinned(o2)) 1
-                            else if (isPinned(o1) && isPinned(o2))
-                                compareBy<T> { getPinnedOrder(it) }.compare(o1, o2)
-                            else cmp.compare(o1, o2)
-                        }
+                    val baseOrder = withIndex().associate { (index, item) -> toId(item) to index }
+                    val baseComparator = cmp ?: compareBy<T> {
+                        baseOrder[toId(it)] ?: Int.MAX_VALUE
+                    }
+                    sortWith { o1, o2 ->
+                        if (isPinned(o1) && !isPinned(o2)) -1
+                        else if (!isPinned(o1) && isPinned(o2)) 1
+                        else if (isPinned(o1) && isPinned(o2))
+                            compareBy<T> { getPinnedOrder(it) }.compare(o1, o2)
+                        else if (isUserPinned(o1) && !isUserPinned(o2)) -1
+                        else if (!isUserPinned(o1) && isUserPinned(o2)) 1
+                        else if (isUserPinned(o1) && isUserPinned(o2))
+                            compareBy<T> { getUserPinnedOrder(it) }.compare(o1, o2)
+                        else baseComparator.compare(o1, o2)
                     }
                 }.toList()
             }.sharePauseableIn(
@@ -288,6 +294,7 @@ abstract class BaseAdapter<T : Any>(
         val title: TextView = view.findViewById(R.id.title)
         val subTitle: TextView = view.findViewById(R.id.artist)
         val trackCount: TextView? = view.findViewById(R.id.track_count)
+        val favoriteButton: MaterialButton? = view.findViewById(R.id.favorite)
         val moreButton: MaterialButton? = view.findViewById(R.id.more)
     }
 
@@ -430,6 +437,8 @@ abstract class BaseAdapter<T : Any>(
     override fun onViewRecycled(holder: ViewHolder) {
         holder.itemView.setOnClickListener(null)
         holder.itemView.setOnLongClickListener(null)
+        holder.favoriteButton?.setOnClickListener(null)
+        holder.favoriteButton?.visibility = View.GONE
         holder.moreButton?.setOnClickListener(null)
         (holder.nowPlaying.drawable as? NowPlayingDrawable?)?.level2Done = null
         holder.nowPlaying.setImageDrawable(null)
@@ -476,6 +485,8 @@ abstract class BaseAdapter<T : Any>(
     protected open fun getPinnedOrder(item: T): Int {
         return 0
     }
+    protected open fun isUserPinned(item: T): Boolean = false
+    protected open fun getUserPinnedOrder(item: T): Long = 0L
     private fun subTitleOf(item: T): String {
         return if (sorter.sortingHelper.canGetArtist())
             sorter.sortingHelper.getArtist(item) ?: context.getString(R.string.unknown_artist)

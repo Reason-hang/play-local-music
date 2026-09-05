@@ -109,8 +109,8 @@ android {
         applicationId = appIdOverride ?: "org.akanework.gramophone"
         minSdk = 23
         targetSdk = 36
-        versionCode = 39
-        versionName = "1.7.6"
+        versionCode = 40
+        versionName = "1.7.7"
         if (buildVersionSuffix.isNotEmpty()) {
             versionNameSuffix = buildVersionSuffix
         }

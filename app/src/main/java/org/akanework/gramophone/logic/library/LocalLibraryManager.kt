@@ -59,6 +59,28 @@ class LocalLibraryManager(context: Context) {
 
     fun selectFilter(value: String) = update { current -> current.copy(activeFilter = value) }
 
+    fun isPinned(mediaItem: MediaItem): Boolean = mediaKeys(mediaItem).any(state.value.pinned::containsKey)
+
+    fun pinnedOrder(mediaItem: MediaItem): Long? = mediaKeys(mediaItem).mapNotNull {
+        state.value.pinned[it]
+    }.minOrNull()
+
+    fun pin(items: Collection<MediaItem>) = update { current ->
+        val pinned = current.pinned.toMutableMap()
+        var nextOrder = (pinned.values.maxOrNull() ?: -1L) + 1L
+        items.forEach { mediaItem ->
+            val keys = mediaKeys(mediaItem)
+            val existingOrder = keys.mapNotNull(pinned::get).minOrNull()
+            val order = existingOrder ?: nextOrder++
+            keys.forEach { key -> pinned[key] = order }
+        }
+        current.copy(pinned = pinned)
+    }
+
+    fun unpin(items: Collection<MediaItem>) = update { current ->
+        current.copy(pinned = current.pinned - items.flatMap(::mediaKeys).toSet())
+    }
+
     fun mediaKeys(mediaItem: MediaItem): Set<String> = mediaItem.getFile()?.absolutePath?.let {
         MediaIdentity.keys(mediaItem.mediaId, it)
     } ?: setOf("id:${mediaItem.mediaId}")
@@ -74,7 +96,7 @@ class LocalLibraryManager(context: Context) {
     }
 
     private fun readState(): LibraryState = runCatching {
-        val root = JSONObject(preferences.getString(STATE_KEY, "{}"))
+        val root = JSONObject(preferences.getString(STATE_KEY, "{}") ?: "{}")
         val hidden = root.optJSONArray("hidden").toStringSet()
         val hiddenRecords = root.optJSONObject("hiddenRecords")?.keys()?.asSequence()?.associateWith { id ->
             root.getJSONObject("hiddenRecords").getJSONObject(id).let { record ->
@@ -87,7 +109,17 @@ class LocalLibraryManager(context: Context) {
         val categories = root.optJSONObject("categories")?.keys()?.asSequence()?.associateWith { name ->
             root.getJSONObject("categories").optJSONArray(name).toStringSet()
         }.orEmpty()
-        LibraryState(hidden, hiddenRecords, categories, root.optString("activeFilter", FILTER_ALL))
+        val pinnedObject = root.optJSONObject("pinned")
+        val pinned = pinnedObject?.keys()?.asSequence()?.associateWith { key ->
+            pinnedObject.optLong(key)
+        }.orEmpty()
+        LibraryState(
+            hidden = hidden,
+            hiddenRecords = hiddenRecords,
+            categories = categories,
+            activeFilter = root.optString("activeFilter", FILTER_ALL),
+            pinned = pinned
+        )
     }.getOrDefault(LibraryState())
 
     private fun encode(value: LibraryState) = JSONObject().apply {
@@ -104,6 +136,9 @@ class LocalLibraryManager(context: Context) {
             value.categories.forEach { (name, keys) -> put(name, JSONArray(keys.toList())) }
         })
         put("activeFilter", value.activeFilter)
+        put("pinned", JSONObject().apply {
+            value.pinned.forEach { (key, order) -> put(key, order) }
+        })
     }.toString()
 
     private fun JSONArray?.toStringSet(): Set<String> = buildSet {
@@ -115,7 +150,8 @@ class LocalLibraryManager(context: Context) {
         val hidden: Set<String> = emptySet(),
         val hiddenRecords: Map<String, HiddenMediaRecord> = emptyMap(),
         val categories: Map<String, Set<String>> = emptyMap(),
-        val activeFilter: String = FILTER_ALL
+        val activeFilter: String = FILTER_ALL,
+        val pinned: Map<String, Long> = emptyMap()
     )
 
     data class HiddenMediaRecord(
@@ -126,6 +162,7 @@ class LocalLibraryManager(context: Context) {
     companion object {
         private const val STATE_KEY = "state_v1"
         const val FILTER_ALL = "all"
+        const val FILTER_FAVORITES = "favorites"
         const val FILTER_MP3 = "mp3"
         const val FILTER_MP4 = "mp4"
         fun categoryFilter(name: String) = "category:$name"

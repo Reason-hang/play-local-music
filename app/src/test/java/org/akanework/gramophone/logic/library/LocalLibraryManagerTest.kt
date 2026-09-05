@@ -45,6 +45,45 @@ class LocalLibraryManagerTest {
         assertEquals(listOf("第二项"), manager.state.value.hiddenRecords.values.map { it.title })
     }
 
+    @Test
+    fun pinningPersistsOrderAndUnpinningDoesNotAffectOtherState() {
+        val manager = LocalLibraryManager(context)
+        val first = media("one", "第一项")
+        val second = media("two", "第二项")
+
+        manager.hide(listOf(first))
+        manager.pin(listOf(first, second))
+
+        val firstOrder = manager.pinnedOrder(first)
+        val secondOrder = manager.pinnedOrder(second)
+        assertTrue(manager.isPinned(first))
+        assertTrue(manager.isPinned(second))
+        assertTrue(firstOrder != null && secondOrder != null && firstOrder < secondOrder)
+
+        manager.unpin(listOf(first))
+
+        assertFalse(manager.isPinned(first))
+        assertTrue(manager.isPinned(second))
+        assertTrue(manager.isHidden(first))
+
+        val reloaded = LocalLibraryManager(context)
+        assertFalse(reloaded.isPinned(first))
+        assertEquals(secondOrder, reloaded.pinnedOrder(second))
+        assertTrue(reloaded.isHidden(first))
+    }
+
+    @Test
+    fun oldStateWithoutPinnedFieldRemainsReadable() {
+        context.getSharedPreferences("local_library", 0).edit()
+            .putString("state_v1", "{\"hidden\":[],\"hiddenRecords\":{},\"categories\":{},\"activeFilter\":\"all\"}")
+            .commit()
+
+        val manager = LocalLibraryManager(context)
+
+        assertTrue(manager.state.value.pinned.isEmpty())
+        assertEquals(LocalLibraryManager.FILTER_ALL, manager.state.value.activeFilter)
+    }
+
     private fun media(id: String, title: String) = MediaItem.Builder()
         .setMediaId(id)
         .setMediaMetadata(MediaMetadata.Builder().setTitle(title).build())

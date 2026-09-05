@@ -42,7 +42,7 @@
         android:layout_marginVertical="@dimen/grid_card_margin_label"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/now_playing"
+        app:layout_constraintEnd_toStartOf="@id/favorite"
         app:layout_constraintStart_toStartOf="@id/cover_frame"
         app:layout_constraintTop_toBottomOf="@id/cover_frame"
         tools:ignore="RtlSymmetry">
@@ -96,5 +96,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/linearLayout"
         app:tint="?attr/colorOnSurface" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/favorite"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/rp_buttons"
+        android:checkable="true"
+        android:contentDescription="@string/favorite"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:saveEnabled="false"
+        android:visibility="gone"
+        app:icon="@drawable/sl_check_fav"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24sp"
+        app:iconTint="@color/sl_fav_button"
+        app:layout_constraintBottom_toBottomOf="@id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@id/now_playing"
+        app:layout_constraintTop_toTopOf="@id/linearLayout"
+        app:tooltipText="@string/playlist_favourite" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

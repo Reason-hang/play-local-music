@@ -95,6 +95,7 @@ class ViewPagerFragment : BaseFragment(true) {
                 filterChips.removeAllViews()
                 listOf(
                     LocalLibraryManager.FILTER_ALL to "全部",
+                    LocalLibraryManager.FILTER_FAVORITES to "收藏",
                     LocalLibraryManager.FILTER_MP3 to "MP3",
                     LocalLibraryManager.FILTER_MP4 to "MP4"
                 ).plus(state.categories.map { (name, keys) ->

@@ -556,4 +556,6 @@
     <string name="loading_playlists">正在加载播放列表…</string>
     <string name="contributors_banksio">Android Auto</string>
     <string name="unfavorite">取消收藏</string>
+    <string name="pin">置顶</string>
+    <string name="unpin">取消置顶</string>
 </resources>
