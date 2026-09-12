@@ -152,6 +152,11 @@
     <string name="settings_category_filters">过滤器</string>
     <string name="settings_blacklist_folder_summary">过滤来自特定文件夹中的歌曲</string>
     <string name="settings_category_full_player">播放器</string>
+    <string name="settings_artwork_category">封面来源</string>
+    <string name="settings_artwork_folder">选择封面文件夹</string>
+    <string name="settings_artwork_folder_summary">可选：仅授权一个音乐或课程文件夹读取 cover.jpg、folder.jpg、albumart.jpg 等封面</string>
+    <string name="settings_artwork_folder_clear">取消封面文件夹授权</string>
+    <string name="settings_artwork_folder_clear_summary">停止从已选择的文件夹读取独立封面图片</string>
     <string name="settings_preference_category_application">应用</string>
     <string name="settings_crash_application">崩溃测试</string>
     <string name="settings_crash_application_summary">Crash-O-Matic 3000</string>

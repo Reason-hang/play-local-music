@@ -87,4 +87,24 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:layout="@layout/preference_category_md"
+        android:title="@string/settings_artwork_category">
+
+        <Preference
+            android:icon="@drawable/ic_folder"
+            android:key="artwork_folder"
+            android:layout="@layout/preference_basic"
+            android:summary="@string/settings_artwork_folder_summary"
+            android:title="@string/settings_artwork_folder" />
+
+        <Preference
+            android:icon="@drawable/ic_folder"
+            android:key="artwork_folder_clear"
+            android:layout="@layout/preference_basic"
+            android:summary="@string/settings_artwork_folder_clear_summary"
+            android:title="@string/settings_artwork_folder_clear" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

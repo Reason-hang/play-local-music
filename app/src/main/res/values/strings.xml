@@ -303,6 +303,11 @@
     <string name="settings_preference_category_application">Application</string>
     <!-- Settings category label for player UI settings that apply to full player (display current song) -->
     <string name="settings_category_full_player">Full player</string>
+    <string name="settings_artwork_category">Artwork sources</string>
+    <string name="settings_artwork_folder">Choose artwork folder</string>
+    <string name="settings_artwork_folder_summary">Optional: allow one music or course folder to provide cover.jpg, folder.jpg, or albumart.jpg</string>
+    <string name="settings_artwork_folder_clear">Remove artwork folder access</string>
+    <string name="settings_artwork_folder_clear_summary">Stop reading sidecar artwork from the selected folder</string>
     <!-- Only used for debugging, not generally user visible -->
     <string name="settings_crash_application">Crash application</string>
     <!-- Only used for debugging, not generally user visible -->

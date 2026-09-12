@@ -275,18 +275,20 @@ class GramophoneApplication : Application(), SingletonImageLoader.Factory,
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(context)
-            .diskCache(null)
             .components {
                 add(CoilArtPipeline.ThumbnailKeyer())
                 add(CoilArtPipeline.AlbumThumbnailKeyer())
                 add(CoilArtPipeline.AudioCoverKeyer())
+                add(CoilArtPipeline.VideoCoverKeyer())
                 add(AndroidUriMapper())
                 add(CoilArtPipeline.ThumbnailMapper())
                 add(CoilArtPipeline.AudioCoverMapper())
+                add(CoilArtPipeline.VideoCoverMapper())
                 add(CoilArtPipeline.AlbumThumbnailMapper())
                 add(CoilArtPipeline.ThumbnailFetcherFactory())
                 add(CoilArtPipeline.AlbumThumbnailFetcherFactory())
                 add(CoilArtPipeline.SongCoverFetcherFactory())
+                add(CoilArtPipeline.VideoCoverFetcherFactory())
             }
             .run {
                 if (!BuildConfig.DEBUG) this else

@@ -115,13 +115,25 @@ class GramophoneAlbumArtProvider : ContentProvider() {
          *
          * @param id the song ID
          */
-        fun buildSongUri(id: Long, songFile: File): Uri =
+        fun buildSongUri(id: Long, songFile: File, cacheKey: String? = null): Uri =
             Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(PROVIDER_AUTHORITY)
                 .appendPath("song")
                 .appendPath(id.toString())
                 .appendQueryParameter("songFile", songFile.absolutePath)
+                .apply { cacheKey?.let { appendQueryParameter("cacheKey", it) } }
+                .build()
+
+        /** Builds a local artwork URI for an MP4 scanned from [MediaStore.Video]. */
+        fun buildVideoUri(id: Long, videoFile: File, cacheKey: String? = null): Uri =
+            Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(PROVIDER_AUTHORITY)
+                .appendPath("video")
+                .appendPath(id.toString())
+                .appendQueryParameter("songFile", videoFile.absolutePath)
+                .apply { cacheKey?.let { appendQueryParameter("cacheKey", it) } }
                 .build()
     }
 

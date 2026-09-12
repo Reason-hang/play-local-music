@@ -90,10 +90,13 @@ object MiscUtils {
                 }
                 if (file.nameWithoutExtension.contentEquals("albumart", true)) score += 24
                 else if (file.nameWithoutExtension.contentEquals("cover", true)) score += 20
+                else if (file.nameWithoutExtension.contentEquals("folder", true)) score += 18
                 else if (file.nameWithoutExtension.startsWith("albumart", true)) score += 16
                 else if (file.nameWithoutExtension.startsWith("cover", true)) score += 12
+                else if (file.nameWithoutExtension.startsWith("folder", true)) score += 10
                 else if (file.nameWithoutExtension.contains("albumart", true)) score += 8
                 else if (file.nameWithoutExtension.contains("cover", true)) score += 4
+                else if (file.nameWithoutExtension.contains("folder", true)) score += 3
                 if (bestScore < score) {
                     bestScore = score
                     bestFile = file

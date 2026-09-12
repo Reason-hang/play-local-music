@@ -37,6 +37,7 @@ import androidx.media3.common.util.Log
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import org.akanework.gramophone.logic.GramophoneAlbumArtProvider
+import org.akanework.gramophone.logic.artwork.ArtworkResolver
 import org.akanework.gramophone.logic.getFile
 import org.akanework.gramophone.logic.hasAudioPermission
 import org.akanework.gramophone.logic.hasImagePermission
@@ -109,7 +110,8 @@ internal object Reader {
             MediaStore.Audio.Media.TRACK,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATE_ADDED,
-            MediaStore.Audio.Media.DATE_MODIFIED
+            MediaStore.Audio.Media.DATE_MODIFIED,
+            MediaStore.Audio.Media.SIZE
         ).apply {
             if (hasImprovedMediaStore()) {
                 add(MediaStore.Audio.Media.GENRE)
@@ -132,7 +134,8 @@ internal object Reader {
         MediaStore.Video.Media.MIME_TYPE,
         MediaStore.Video.Media.DURATION,
         MediaStore.Video.Media.DATE_ADDED,
-        MediaStore.Video.Media.DATE_MODIFIED
+        MediaStore.Video.Media.DATE_MODIFIED,
+        MediaStore.Video.Media.SIZE
     )
 
     /** The first release scope accepts MP4 containers with an AAC audio track. */
@@ -391,6 +394,7 @@ internal object Reader {
             val durationColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val addDateColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
             val modifiedDateColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
+            val sizeColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
 
             while (it.moveToNext()) {
                 // DATA may be null for scoped-storage rows. Such rows cannot be opened through
@@ -436,6 +440,7 @@ internal object Reader {
                 val genre = genreColumn?.let { col -> it.getStringOrNullIfThrow(col) }
                 val addDate = it.getLongOrNullIfThrow(addDateColumn)
                 val modifiedDate = it.getLongOrNullIfThrow(modifiedDateColumn)
+                val sizeBytes = it.getLongOrNullIfThrow(sizeColumn) ?: 0L
                 val dateTakenParsed = if (hasImprovedMediaStore()) {
                     // the column exists since R, so we can always use these APIs
                     dateTaken?.toLongOrNull()?.let { it1 -> Instant.ofEpochMilli(it1) }
@@ -450,7 +455,17 @@ internal object Reader {
                 val dateTakenDay = if (hasImprovedMediaStore()) {
                     dateTakenParsed?.dayOfMonth
                 } else null
-                val imgUri = GramophoneAlbumArtProvider.buildSongUri(id, pathFile)
+                val imgUri = GramophoneAlbumArtProvider.buildSongUri(
+                    id,
+                    pathFile,
+                    ArtworkResolver.cacheKey(
+                        context,
+                        ArtworkResolver.Kind.AUDIO,
+                        id,
+                        sizeBytes,
+                        modifiedDate ?: 0L,
+                    ),
+                )
                 if (cdTrackNumber != null && trackNumber == null) {
                     cdTrackNumber.toIntOrNull()?.let {
                         trackNumber = it
@@ -616,6 +631,7 @@ internal object Reader {
                 val durationColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
                 val addDateColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
                 val modifiedDateColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
+                val sizeColumn = it.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
 
                 while (it.moveToNext()) {
                     val path = it.getString(pathColumn) ?: continue
@@ -639,6 +655,18 @@ internal object Reader {
                     val mimeType = it.getStringOrNull(mimeTypeColumn)
                     val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                     val mp4TrackInfo = inspectMp4Tracks(context, uri, mimeType, fileName) ?: continue
+                    val modifiedDate = it.getLongOrNullIfThrow(modifiedDateColumn)
+                    val artworkUri = GramophoneAlbumArtProvider.buildVideoUri(
+                        id,
+                        pathFile,
+                        ArtworkResolver.cacheKey(
+                            context,
+                            ArtworkResolver.Kind.VIDEO,
+                            id,
+                            it.getLongOrNullIfThrow(sizeColumn) ?: 0L,
+                            modifiedDate ?: 0L,
+                        ),
+                    )
 
                     val song = MediaItem.Builder()
                         .setUri(uri)
@@ -654,14 +682,17 @@ internal object Reader {
                                 )
                                 .setDurationMs(duration)
                                 .setTitle(it.getString(titleColumn) ?: pathFile.nameWithoutExtension)
+                                .setArtworkUri(artworkUri)
                                 .setUserRating(HeartRating(false))
                                 .setExtras(Bundle().apply {
                                     it.getLongOrNullIfThrow(addDateColumn)?.let { date ->
                                         putLong(EXTRA_ADD_DATE, date)
                                     }
-                                    it.getLongOrNullIfThrow(modifiedDateColumn)?.let { date ->
+                                    modifiedDate?.let { date ->
                                         putLong(EXTRA_MODIFIED_DATE, date)
                                     }
+                                    putParcelable(EXTRA_HD_ARTWORK_URI, artworkUri.buildUpon()
+                                        .appendQueryParameter("hd", "1").build())
                                     putString(EXTRA_FILE, path)
                                 })
                                 .build()

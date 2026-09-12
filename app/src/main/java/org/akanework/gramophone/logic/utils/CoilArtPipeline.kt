@@ -63,6 +63,8 @@ import org.akanework.gramophone.logic.queryWithPending
 import org.nift4.mediastorecompat.MediaStoreCompat
 import org.nift4.mediastorecompat.StorageManagerCompat
 import uk.akane.libphonograph.utils.MiscUtils
+import org.akanework.gramophone.logic.artwork.ArtworkResolver
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.Locale
@@ -126,7 +128,9 @@ object CoilArtPipeline {
                     val imgFile = MiscUtils.findBestCover(songFile.parentFile!!)
                         ?: return@Fetcher continueFetchingOrFail(
                             LoadAudioCoverData(
-                                ContentUris.parseId(data.songUri), songFile
+                                ContentUris.parseId(data.songUri),
+                                songFile,
+                                "artwork:audio:${ContentUris.parseId(data.songUri)}:album",
                             ), options, imageLoader
                         )
                     MediaStoreCompat.getMediaUriForFile(options.context, imgFile.absolutePath)
@@ -171,7 +175,9 @@ object CoilArtPipeline {
                         if (it == null || !it.moveToFirst()) {
                             return@Fetcher continueFetchingOrFail(
                                 LoadAudioCoverData(
-                                    ContentUris.parseId(data.songUri), songFile
+                                    ContentUris.parseId(data.songUri),
+                                    songFile,
+                                    "artwork:audio:${ContentUris.parseId(data.songUri)}:album",
                                 ), options, imageLoader
                             )
                         }
@@ -271,11 +277,11 @@ object CoilArtPipeline {
         }
     }
 
-    data class LoadAudioCoverData(val id: Long, val songFile: File?)
+    data class LoadAudioCoverData(val id: Long, val songFile: File?, val cacheKey: String)
 
     class AudioCoverKeyer : Keyer<LoadAudioCoverData> {
         override fun key(data: LoadAudioCoverData, options: Options): String {
-            return data.toString()
+            return data.cacheKey
         }
     }
 
@@ -287,7 +293,9 @@ object CoilArtPipeline {
                 LoadAudioCoverData(data.pathSegments[1].toLong(),
                     // Security: query parameters are removed before album art provider uses Uri
                     data.toAndroidUri().getQueryParameter("songFile")
-                        ?.let { File(it) })
+                        ?.let { File(it) },
+                    data.toAndroidUri().getQueryParameter("cacheKey")
+                        ?: "artwork:audio:${data.pathSegments[1]}")
             } else null
         }
     }
@@ -301,48 +309,30 @@ object CoilArtPipeline {
             return Fetcher {
                 val uri = ContentUris.withAppendedId(MediaStore.Audio.Media
                     .EXTERNAL_CONTENT_URI, data.id)
-                MediaStoreCompat.openAssetFileDescriptor(options.context,
-                    uri, "r")!!.use { afd ->
-                    val retriever = MediaMetadataRetriever()
-                    try {
-                        if (afd.declaredLength == AssetFileDescriptor.UNKNOWN_LENGTH &&
-                            afd.startOffset == 0L
-                        )
-                            retriever.setDataSource(afd.fileDescriptor)
-                        else
-                            retriever.setDataSource(
-                                afd.fileDescriptor, afd.startOffset,
-                                afd.length
-                            )
-                        retriever.embeddedPicture?.let { raw ->
-                            return@Fetcher SourceFetchResult(
-                                source = ImageSource(
-                                    Buffer().write(raw),
-                                    options.fileSystem,
-                                    metadata = null,
-                                ),
-                                mimeType = null,
-                                dataSource = DataSource.DISK,
-                            )
-                        }
-                    } catch (e: RuntimeException) {
-                        throw IOException("Failed to create thumbnail", e)
-                    } finally {
-                        try {
-                            retriever.close()
-                        } catch (_: Exception) {
-                        }
-                    }
+                embeddedPicture(options.context, uri)?.let { raw ->
+                    ArtworkResolver.logSource(ArtworkResolver.Kind.AUDIO,
+                        ArtworkResolver.Source.EMBEDDED)
+                    return@Fetcher sourceFetchResult(raw, options)
+                }
+                // Sidecar reading is limited to a directory explicitly selected with SAF. It is
+                // attempted before the MediaStore thumbnail fallback and never asks for the
+                // broad READ_MEDIA_IMAGES permission.
+                val file = data.songFile ?: getFileFor(options.context, uri)
+                ArtworkResolver.findSidecar(options.context, file)?.let { sidecarUri ->
+                    ArtworkResolver.logSource(ArtworkResolver.Kind.AUDIO,
+                        ArtworkResolver.Source.SIDECAR)
+                    return@Fetcher continueFetchingOrFail(sidecarUri, options, imageLoader)
                 }
                 if (hasScopedStorageWithMediaTypes() && (Flags.REMOVE_IMAGE_PERMISSION ||
                             !options.context.hasImagePermission())) {
+                    ArtworkResolver.logSource(ArtworkResolver.Kind.AUDIO,
+                        ArtworkResolver.Source.MEDIASTORE_THUMBNAIL)
                     return@Fetcher continueFetchingOrFail(LoadThumbnailData(uri),
                         options, imageLoader)
                 }
                 // We shouldn't trust the uri wrt path of song, otherwise this provider could be
                 // misused to get image files from any folder. So do a query here
                 // (Note: data.songFile is only set for trusted data!)
-                val file = data.songFile ?: getFileFor(options.context, uri)
                 // Only poke around for files on external storage
                 if (Environment.MEDIA_UNKNOWN ==
                     Environment.getExternalStorageState(file)) {
@@ -368,6 +358,8 @@ object CoilArtPipeline {
                     }
 
                     if (found.isNullOrEmpty()) {
+                        ArtworkResolver.logSource(ArtworkResolver.Kind.AUDIO,
+                            ArtworkResolver.Source.PLACEHOLDER)
                         throw NoAlbumArtException("No album art found")
                     }
                     val bestFile = found.maxWith(compareBy {
@@ -412,6 +404,8 @@ object CoilArtPipeline {
                                 " ? ESCAPE '\\'", arrayOf("$escaped/%",
                             "$escaped/%/%"), sortOrder, limit = 1).use {
                         if (it == null || !it.moveToFirst()) {
+                            ArtworkResolver.logSource(ArtworkResolver.Kind.AUDIO,
+                                ArtworkResolver.Source.PLACEHOLDER)
                             throw NoAlbumArtException("No album art found")
                         }
                         ContentUris.withAppendedId(
@@ -426,7 +420,101 @@ object CoilArtPipeline {
         }
     }
 
+    data class LoadVideoCoverData(val id: Long, val videoFile: File?, val cacheKey: String)
+
+    class VideoCoverKeyer : Keyer<LoadVideoCoverData> {
+        override fun key(data: LoadVideoCoverData, options: Options): String = data.cacheKey
+    }
+
+    class VideoCoverMapper : Mapper<Uri, LoadVideoCoverData> {
+        override fun map(data: Uri, options: Options): LoadVideoCoverData? {
+            if (data.scheme != ContentResolver.SCHEME_CONTENT ||
+                data.authority != GramophoneAlbumArtProvider.PROVIDER_AUTHORITY ||
+                data.pathSegments.firstOrNull() != "video") return null
+            val id = data.pathSegments.getOrNull(1)?.toLongOrNull() ?: return null
+            return LoadVideoCoverData(
+                id,
+                data.toAndroidUri().getQueryParameter("songFile")?.let(::File),
+                data.toAndroidUri().getQueryParameter("cacheKey") ?: "artwork:video:$id",
+            )
+        }
+    }
+
+    class VideoCoverFetcherFactory : Fetcher.Factory<LoadVideoCoverData> {
+        override fun create(
+            data: LoadVideoCoverData,
+            options: Options,
+            imageLoader: ImageLoader,
+        ): Fetcher = Fetcher {
+            val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, data.id)
+            embeddedPicture(options.context, uri)?.let { raw ->
+                ArtworkResolver.logSource(ArtworkResolver.Kind.VIDEO,
+                    ArtworkResolver.Source.EMBEDDED)
+                return@Fetcher sourceFetchResult(raw, options)
+            }
+            val file = data.videoFile ?: getFileFor(options.context, uri)
+            ArtworkResolver.findSidecar(options.context, file)?.let { sidecarUri ->
+                ArtworkResolver.logSource(ArtworkResolver.Kind.VIDEO,
+                    ArtworkResolver.Source.SIDECAR)
+                return@Fetcher continueFetchingOrFail(sidecarUri, options, imageLoader)
+            }
+            videoFrame(options.context, uri)?.let { raw ->
+                ArtworkResolver.logSource(ArtworkResolver.Kind.VIDEO,
+                    ArtworkResolver.Source.VIDEO_FRAME)
+                return@Fetcher sourceFetchResult(raw, options)
+            }
+            ArtworkResolver.logSource(ArtworkResolver.Kind.VIDEO,
+                ArtworkResolver.Source.PLACEHOLDER)
+            throw NoAlbumArtException("No album art found")
+        }
+    }
+
     class NoAlbumArtException(message: String) : IOException(message)
+
+    private fun sourceFetchResult(raw: ByteArray, options: Options) = SourceFetchResult(
+        source = ImageSource(Buffer().write(raw), options.fileSystem, metadata = null),
+        mimeType = null,
+        dataSource = DataSource.DISK,
+    )
+
+    private fun embeddedPicture(context: Context, uri: android.net.Uri): ByteArray? =
+        withRetriever(context, uri) { it.embeddedPicture }
+
+    private fun videoFrame(context: Context, uri: android.net.Uri): ByteArray? =
+        withRetriever(context, uri) { retriever ->
+            retriever.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+        }?.let { bitmap ->
+            try {
+                ByteArrayOutputStream().use { output ->
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, output)
+                    output.toByteArray()
+                }
+            } finally {
+                bitmap.recycle()
+            }
+        }
+
+    private inline fun <T> withRetriever(context: Context, uri: android.net.Uri,
+                                         block: (MediaMetadataRetriever) -> T): T {
+        return MediaStoreCompat.openAssetFileDescriptor(context, uri, "r")!!.use { afd ->
+            val retriever = MediaMetadataRetriever()
+            try {
+                if (afd.declaredLength == AssetFileDescriptor.UNKNOWN_LENGTH && afd.startOffset == 0L) {
+                    retriever.setDataSource(afd.fileDescriptor)
+                } else {
+                    retriever.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                }
+                block(retriever)
+            } catch (e: RuntimeException) {
+                throw IOException("Failed to create thumbnail", e)
+            } finally {
+                try {
+                    retriever.close()
+                } catch (_: Exception) {
+                }
+            }
+        }
+    }
 
     private suspend inline fun getFileFor(context: Context, mediaUri: android.net.Uri): File {
         return runWithCancellationSignal { signal ->
