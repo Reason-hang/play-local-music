@@ -54,5 +54,6 @@
     "app/src/test/java/org/akanework/gramophone/ui/RowInteractionRegressionTest.kt": "60f6423ccd513e18e92578fdd18a32ba4d1e97e65278a03370525a680ab54845",
     "app/src/test/java/org/akanework/gramophone/ui/SongListSnapshotTest.kt": "ee98784ca15061394754ef01b7ead16ff11e491d52733b84bffd195ccff2f760"
   },
-  "device": "adb no connected device; no Redmi acceptance"
+  "device": "adb no connected device; no Redmi acceptance",
+  "sourceCommit": "662df021f5bd4e88f6e62e5d4500508ddc47efb4"
 }

@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "662df021f5bd4e88f6e62e5d4500508ddc47efb4",
+  "validatedSourceHashMatchesCommit": true,
+  "gitStatus": "?? outputs/\n",
+  "version": "1.7.9",
+  "versionCode": 42,
+  "sourceSha256": {
+    "app/build.gradle.kts": "ba33fdf200d4a597dc04d4ce7c56017e99569b0630e0ea2540f9917fe7a656a0",
+    "app/src/course/res/values/strings.xml": "63dbeb967996b144b4546de5ae551cc9018406febda1757ac399a0fe8f2561a2",
+    "app/src/main/java/org/akanework/gramophone/logic/GramophonePlaybackService.kt": "ef0ae3dc0ca4bd9448883da71576efdc0f3f55a5b14e14ecc07823883ae6801b",
+    "app/src/main/java/org/akanework/gramophone/logic/library/FavoritePlaylistWriter.kt": "e7bd173a0f3a739e08487e2c658a1f5dcbc40004241c8311653a9a8d0e63082a",
+    "app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/EndedWorkaroundPlayer.kt": "18a4b24fda822aff05834c4d641b4b8c9d8816e02f65d3067cf347b8277b3c31",
+    "app/src/main/java/org/akanework/gramophone/ui/MainActivity.kt": "6b6b128abdb26c831c0edba55e140162b539c8275bb7d3f21e49ba24f150176c",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/BaseAdapter.kt": "c1b16e88359dc0538ffe49f1983a8b667ce98e11b0bf7bfd0ae0821a8063f163",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongAdapter.kt": "2cb28d2b922547c61dc7f6d96a05a6dec8059b23dae60fa9fc3b9fb3049e78db",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongListSnapshot.kt": "2eae2cfbae8efe85d86d6cb982355a03aba24ef8d1bf8166df5d33a722197a60",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PinnedSongsDecoration.kt": "a5eaa243c1cb58d3971cdf848af97f8ad5a9cad389d7b1b90ea37798d8a42dfc",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PlayerBottomSheet.kt": "b585130e018506639cc9129e1027e67e259f34b22f16fa440b5bc1ba4ba9f7a8",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PreviewBottomSheet.kt": "e905c64913d6721a8f3d3f6bc29b7b63908737f271f30bf25c8e502d2733762a",
+    "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt": "d0e4102da669d208b08d02b70e7c2ea2231600d9501bd468cd44cc4f3f38d560",
+    "app/src/main/java/uk/akane/libphonograph/manipulator/PlaylistSerializer.kt": "b7afe7dc95a6dca0f51edc69926a1de0502d6129c5380df153901cdaa28f9064",
+    "app/src/main/res/layout/activity_video_player.xml": "24b6444d0c04f57bfaddd4a58c0a055957491eb6934f1c4a164a2fa85b6095d0",
+    "app/src/main/res/values/strings.xml": "1d538f36f48cfcbd14e9eb0bba3abe35f6da97811b553ff4738b66fa11b6e725",
+    "app/src/test/java/org/akanework/gramophone/logic/library/LegacyFavoriteAuthorityTest.kt": "5e8d0627f1945b9955142bf4861ef4194ff2bcf00878eb4348f9c90f6eb35923",
+    "app/src/test/java/org/akanework/gramophone/logic/library/PlaylistMemoryCodecTest.kt": "575dabaacfe905b142ed951e86c6e0842fb9ff757042ddcd0780e8ac9adf0a97",
+    "app/src/test/java/org/akanework/gramophone/logic/library/SeamlessQueueRegressionTest.kt": "07ae5991a1bfe718c0f1b9aed98f2ba4947d8c393b7f68a8ed32ef0ad723cef7",
+    "app/src/test/java/org/akanework/gramophone/ui/BaseAdapterClickTest.kt": "ae9411a470092f2e91eaee21921cec7a244ec40a6a681519ccc2a92cfeb55016",
+    "app/src/test/java/org/akanework/gramophone/ui/InteractionBehaviorTest.kt": "2eb1393bab043298727800840cb24e4bd0622ff1059dac4fdebab8aaeba522a7",
+    "app/src/test/java/org/akanework/gramophone/ui/PinnedSongsDecorationTest.kt": "93aaf13aeb9bfeaab951bb429d21965e3dc213d00d089fd2a0c27433f899aaa5",
+    "app/src/test/java/org/akanework/gramophone/ui/RowInteractionRegressionTest.kt": "60f6423ccd513e18e92578fdd18a32ba4d1e97e65278a03370525a680ab54845",
+    "app/src/test/java/org/akanework/gramophone/ui/SongListSnapshotTest.kt": "ee98784ca15061394754ef01b7ead16ff11e491d52733b84bffd195ccff2f760"
+  }
+}

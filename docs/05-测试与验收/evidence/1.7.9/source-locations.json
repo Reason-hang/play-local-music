@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "662df021f5bd4e88f6e62e5d4500508ddc47efb4",
+  "locations": {
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/BaseAdapter.kt": {
+      "override fun onBindViewHolder(": 350
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongAdapter.kt": {
+      "override fun onClick(": 294,
+      "override fun onBindViewHolder(holder: ViewHolder, position: Int)": 245
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongListSnapshot.kt": {
+      "fun clickedIndex(": 7,
+      "fun pinnedBoundary(": 12
+    },
+    "app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/EndedWorkaroundPlayer.kt": {
+      "fun setMediaItemsSeamlessly(": 199
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/MainActivity.kt": {
+      "fun markIsFavoriteStatus(": 380,
+      "fun drainFavoriteRequests(": 391,
+      "fun doMarkIsFavoriteStatus(": 447
+    },
+    "app/src/main/java/org/akanework/gramophone/logic/library/FavoritePlaylistWriter.kt": {
+      "suspend fun update(": 41,
+      "fun updatedEntries(": 25
+    },
+    "app/src/main/java/org/akanework/gramophone/logic/GramophonePlaybackService.kt": {
+      "FavoritePlaylistWriter.update(": 739
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/components/PlayerBottomSheet.kt": {
+      "var visible =": 86,
+      "override fun onAttachedToWindow(": 204
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/components/PreviewBottomSheet.kt": {
+      "override fun onMediaItemTransition(": 128
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt": {
+      "class VideoGesturePlayerView(": 16
+    },
+    "app/src/main/res/layout/activity_video_player.xml": {
+      "VideoGesturePlayerView": 8
+    },
+    "app/src/main/java/org/akanework/gramophone/ui/components/PinnedSongsDecoration.kt": {
+      "class PinnedSongsDecoration(": 9
+    },
+    "app/src/main/java/uk/akane/libphonograph/manipulator/PlaylistSerializer.kt": {
+      "fun encode(": 83,
+      "fun read(outFile:": 97
+    }
+  }
+}

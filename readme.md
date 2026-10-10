@@ -1,6 +1,6 @@
 # 本地听歌
 
-状态：1.7.9／42 已实现并完成双变体自动化、审计修复和 Release Lint；SelfBuilt APK 待构建校验，Redmi 真机待验收。
+状态：1.7.9／42 已实现并完成双变体自动化、审计修复和 Release Lint；SelfBuilt 双 APK 已构建校验，Redmi 真机待验收。
 
 本地听歌基于 Gramophone 二次开发，仅提供本地媒体库播放：MP3 与包含 AAC 音轨的 MP4。MP4 可在播放页点击画面进入全屏播放；锁屏、通知栏、蓝牙、队列与后台播放沿用既有 Media3 `MediaSession` 服务。
 
@@ -31,8 +31,8 @@
 
 | 安装包 | 应用 ID | 用途 |
 | --- | --- | --- |
-| `outputs/本地听歌-1.7.9.apk` | `org.akanework.gramophone` | 待构建校验；覆盖此前的“本地听歌”安装。 |
-| `outputs/多听课程-1.7.9.apk` | `org.akanework.gramophone.course` | 待构建校验；白底居中的缩小橙色耳机图标、火焰橙主题，可与“本地听歌”同时安装，分类、置顶、隐藏、断点和设置按包隔离，收藏共享公共 Favorite 文件。 |
+| `outputs/本地听歌-1.7.9.apk` | `org.akanework.gramophone` | 已构建校验；覆盖此前的“本地听歌”安装。 |
+| `outputs/多听课程-1.7.9.apk` | `org.akanework.gramophone.course` | 已构建校验；白底居中的缩小橙色耳机图标、火焰橙主题，可与“本地听歌”同时安装，分类、置顶、隐藏、断点和设置按包隔离，收藏共享公共 Favorite 文件。 |
 
 两个 APK 文件名均不含 `debug`，但在未提供正式 keystore 前仍是 SelfBuilt 签名，不能作为商店发布包。
 

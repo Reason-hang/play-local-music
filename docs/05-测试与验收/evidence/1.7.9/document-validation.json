@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-10",
+  "sourceCommit": "662df021f5bd4e88f6e62e5d4500508ddc47efb4",
+  "markdownFilesChecked": 20,
+  "brokenLocalLinks": [],
+  "currentVersion": "1.7.9/42",
+  "historyPolicy": "过时当前状态清除；历史版本台账与证据按日期保留",
+  "testsPerFlavor": 108,
+  "lintErrorsPerFlavor": 0,
+  "apkCount": 2
+}
