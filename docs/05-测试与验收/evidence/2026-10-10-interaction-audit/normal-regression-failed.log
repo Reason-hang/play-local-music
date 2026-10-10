@@ -1,0 +1,356 @@
+Configuration on demand is an incubating feature.
+Reusing configuration cache.
+> Task :misc:audiofxstub:compileJava UP-TO-DATE
+> Task :misc:audiofxfwd:compileJava UP-TO-DATE
+> Task :misc:audiofxfwd:processResources NO-SOURCE
+> Task :misc:audiofxfwd:classes UP-TO-DATE
+> Task :misc:audiofxfwd:jar UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preLocalDebugBuild UP-TO-DATE
+> Task :app:generateLocalDebugBuildConfig UP-TO-DATE
+> Task :app:prepareLibraryDefinitionsLocalDebug UP-TO-DATE
+> Task :app:extractLocalDebugSupportedLocales UP-TO-DATE
+> Task :app:mapLocalDebugSourceSetPaths UP-TO-DATE
+> Task :hificore:preBuild UP-TO-DATE
+> Task :hificore:preDebugBuild UP-TO-DATE
+> Task :hificore:extractDebugSupportedLocales UP-TO-DATE
+> Task :misc:alacdecoder:preBuild UP-TO-DATE
+> Task :misc:alacdecoder:preDebugBuild UP-TO-DATE
+> Task :misc:alacdecoder:extractDebugSupportedLocales UP-TO-DATE
+> Task :app:generateLocalDebugResources UP-TO-DATE
+> Task :hificore:processDebugNavigationResources UP-TO-DATE
+> Task :misc:alacdecoder:processDebugNavigationResources UP-TO-DATE
+> Task :hificore:generateDebugResources UP-TO-DATE
+> Task :hificore:packageDebugResources UP-TO-DATE
+> Task :hificore:parseDebugLocalResources UP-TO-DATE
+> Task :hificore:generateDebugRFile UP-TO-DATE
+> Task :misc:audiofxstub2:preBuild UP-TO-DATE
+> Task :misc:audiofxstub2:preDebugBuild UP-TO-DATE
+> Task :misc:audiofxstub2:generateDebugResources UP-TO-DATE
+> Task :misc:audiofxstub2:packageDebugResources UP-TO-DATE
+> Task :misc:audiofxstub2:processDebugNavigationResources UP-TO-DATE
+> Task :misc:audiofxstub2:parseDebugLocalResources UP-TO-DATE
+> Task :misc:audiofxstub2:generateDebugRFile UP-TO-DATE
+> Task :misc:audiofxstub2:javaPreCompileDebug UP-TO-DATE
+> Task :misc:audiofxstub2:compileDebugJavaWithJavac UP-TO-DATE
+> Task :misc:audiofxstub2:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :hificore:javaPreCompileDebug UP-TO-DATE
+> Task :misc:alacdecoder:generateDebugResources UP-TO-DATE
+> Task :misc:alacdecoder:packageDebugResources UP-TO-DATE
+> Task :misc:alacdecoder:parseDebugLocalResources UP-TO-DATE
+> Task :misc:alacdecoder:generateDebugRFile UP-TO-DATE
+> Task :misc:alacdecoder:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileLocalDebug UP-TO-DATE
+> Task :hificore:writeDebugAarMetadata UP-TO-DATE
+> Task :misc:alacdecoder:writeDebugAarMetadata UP-TO-DATE
+> Task :app:createLocalDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksLocalDebug UP-TO-DATE
+> Task :hificore:extractDeepLinksDebug UP-TO-DATE
+> Task :hificore:processDebugManifest UP-TO-DATE
+> Task :misc:alacdecoder:extractDeepLinksDebug UP-TO-DATE
+> Task :misc:alacdecoder:processDebugManifest UP-TO-DATE
+> Task :hificore:mapDebugSourceSetPaths UP-TO-DATE
+> Task :hificore:compileDebugLibraryResources UP-TO-DATE
+> Task :misc:alacdecoder:mapDebugSourceSetPaths UP-TO-DATE
+> Task :misc:alacdecoder:compileDebugLibraryResources UP-TO-DATE
+> Task :app:preLocalDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileLocalDebugUnitTest UP-TO-DATE
+> Task :app:generateLocalDebugAssets UP-TO-DATE
+> Task :hificore:generateDebugAssets UP-TO-DATE
+> Task :hificore:mergeDebugAssets UP-TO-DATE
+> Task :misc:alacdecoder:generateDebugAssets UP-TO-DATE
+> Task :misc:alacdecoder:mergeDebugAssets UP-TO-DATE
+> Task :misc:alacdecoder:processDebugJavaRes NO-SOURCE
+> Task :app:preCourseDebugBuild UP-TO-DATE
+> Task :app:generateCourseDebugBuildConfig UP-TO-DATE
+> Task :app:prepareLibraryDefinitionsCourseDebug UP-TO-DATE
+> Task :app:extractCourseDebugSupportedLocales UP-TO-DATE
+> Task :app:mapCourseDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateCourseDebugResources UP-TO-DATE
+> Task :app:javaPreCompileCourseDebug UP-TO-DATE
+> Task :app:createCourseDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksCourseDebug UP-TO-DATE
+> Task :app:preCourseDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileCourseDebugUnitTest UP-TO-DATE
+> Task :app:generateCourseDebugAssets UP-TO-DATE
+> Task :media3:lib-database:preBuild UP-TO-DATE
+> Task :media3:lib-database:preDebugBuild UP-TO-DATE
+> Task :media3:lib-database:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-decoder-midi:preBuild UP-TO-DATE
+> Task :media3:lib-decoder-midi:preDebugBuild UP-TO-DATE
+> Task :media3:lib-decoder-midi:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-decoder:preBuild UP-TO-DATE
+> Task :media3:lib-decoder:preDebugBuild UP-TO-DATE
+> Task :media3:lib-decoder:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-container:preBuild UP-TO-DATE
+> Task :media3:lib-container:preDebugBuild UP-TO-DATE
+> Task :media3:lib-container:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-extractor:preBuild UP-TO-DATE
+> Task :media3:lib-extractor:preDebugBuild UP-TO-DATE
+> Task :media3:lib-extractor:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-exoplayer:preBuild UP-TO-DATE
+> Task :media3:lib-exoplayer:preDebugBuild UP-TO-DATE
+> Task :media3:lib-exoplayer:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-session:preBuild UP-TO-DATE
+> Task :media3:lib-session:preDebugBuild UP-TO-DATE
+> Task :media3:lib-session:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-common-ktx:preBuild UP-TO-DATE
+> Task :media3:lib-common-ktx:preDebugBuild UP-TO-DATE
+> Task :media3:lib-common-ktx:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-common:preBuild UP-TO-DATE
+> Task :media3:lib-common:preDebugBuild UP-TO-DATE
+> Task :media3:lib-common:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-datasource:preBuild UP-TO-DATE
+> Task :media3:lib-datasource:preDebugBuild UP-TO-DATE
+> Task :media3:lib-datasource:extractDebugSupportedLocales UP-TO-DATE
+> Task :media3:lib-decoder:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-extractor:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-exoplayer:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-datasource:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-session:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-database:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-container:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-common-ktx:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-common:processDebugNavigationResources UP-TO-DATE
+> Task :media3:lib-common:generateDebugResources UP-TO-DATE
+> Task :media3:lib-common:packageDebugResources UP-TO-DATE
+> Task :media3:lib-common:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-common:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-common:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-common:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-common:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-common:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-container:generateDebugResources UP-TO-DATE
+> Task :media3:lib-container:packageDebugResources UP-TO-DATE
+> Task :media3:lib-container:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-container:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-container:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-container:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-container:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-container:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-database:generateDebugResources UP-TO-DATE
+> Task :media3:lib-database:packageDebugResources UP-TO-DATE
+> Task :media3:lib-database:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-database:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-database:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-database:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-database:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-database:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-datasource:generateDebugResources UP-TO-DATE
+> Task :media3:lib-datasource:packageDebugResources UP-TO-DATE
+> Task :media3:lib-datasource:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-datasource:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-datasource:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-datasource:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-datasource:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-datasource:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-decoder:generateDebugResources UP-TO-DATE
+> Task :media3:lib-decoder:packageDebugResources UP-TO-DATE
+> Task :media3:lib-decoder:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-decoder:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-decoder:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-decoder:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-decoder:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-decoder:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:generateDebugResources UP-TO-DATE
+> Task :media3:lib-exoplayer:packageDebugResources UP-TO-DATE
+> Task :media3:lib-exoplayer:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-exoplayer:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-extractor:generateDebugResources UP-TO-DATE
+> Task :media3:lib-extractor:packageDebugResources UP-TO-DATE
+> Task :media3:lib-extractor:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-extractor:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-extractor:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-extractor:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-extractor:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-extractor:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-exoplayer:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-exoplayer:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-decoder-midi:generateDebugResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:packageDebugResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-decoder-midi:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-decoder-midi:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-decoder-midi:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-decoder-midi:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-common-ktx:generateDebugResources UP-TO-DATE
+> Task :media3:lib-common-ktx:packageDebugResources UP-TO-DATE
+> Task :media3:lib-common-ktx:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-common-ktx:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-common-ktx:compileDebugKotlin UP-TO-DATE
+> Task :media3:lib-common-ktx:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-common-ktx:compileDebugJavaWithJavac NO-SOURCE
+> Task :media3:lib-common-ktx:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-session:compileDebugAidl UP-TO-DATE
+> Task :media3:lib-session:generateDebugResources UP-TO-DATE
+> Task :media3:lib-session:packageDebugResources UP-TO-DATE
+> Task :media3:lib-session:parseDebugLocalResources UP-TO-DATE
+> Task :media3:lib-session:generateDebugRFile UP-TO-DATE
+> Task :media3:lib-session:compileDebugKotlin NO-SOURCE
+> Task :media3:lib-session:javaPreCompileDebug UP-TO-DATE
+> Task :media3:lib-session:compileDebugJavaWithJavac UP-TO-DATE
+> Task :media3:lib-session:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-container:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-common:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-common-ktx:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-database:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-decoder-midi:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-extractor:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-session:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-datasource:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-decoder:writeDebugAarMetadata UP-TO-DATE
+> Task :media3:lib-container:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-common:processDebugManifest UP-TO-DATE
+> Task :media3:lib-datasource:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-decoder:processDebugManifest UP-TO-DATE
+> Task :media3:lib-decoder-midi:processDebugManifest UP-TO-DATE
+> Task :media3:lib-database:processDebugManifest UP-TO-DATE
+> Task :media3:lib-session:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-decoder-midi:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-container:processDebugManifest UP-TO-DATE
+> Task :media3:lib-database:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-datasource:processDebugManifest UP-TO-DATE
+> Task :media3:lib-extractor:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:processDebugManifest UP-TO-DATE
+> Task :media3:lib-decoder:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-common:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-extractor:processDebugManifest UP-TO-DATE
+> Task :media3:lib-common-ktx:processDebugManifest UP-TO-DATE
+> Task :media3:lib-common-ktx:extractDeepLinksDebug UP-TO-DATE
+> Task :media3:lib-session:processDebugManifest UP-TO-DATE
+> Task :media3:lib-extractor:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-decoder:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-session:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-session:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-common-ktx:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-exoplayer:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-container:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-container:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-datasource:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-datasource:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-database:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-database:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-decoder:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-exoplayer:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-decoder-midi:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-extractor:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-common:mapDebugSourceSetPaths UP-TO-DATE
+> Task :media3:lib-common:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-common-ktx:compileDebugLibraryResources UP-TO-DATE
+> Task :media3:lib-common:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-common:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-common-ktx:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-common-ktx:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-decoder-midi:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-decoder-midi:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-decoder:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-decoder:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-database:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-database:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-datasource:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-datasource:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-container:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-container:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-session:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-session:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-exoplayer:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-exoplayer:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-extractor:generateDebugAssets UP-TO-DATE
+> Task :media3:lib-extractor:mergeDebugAssets UP-TO-DATE
+> Task :media3:lib-database:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-container:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-datasource:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-decoder-midi:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-exoplayer:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-common:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-common-ktx:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-database:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-decoder:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-common-ktx:processDebugJavaRes UP-TO-DATE
+> Task :media3:lib-extractor:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-session:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-extractor:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-exoplayer:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-datasource:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-decoder:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-decoder-midi:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :media3:lib-session:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-container:processDebugJavaRes NO-SOURCE
+> Task :media3:lib-common:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:generateLocalDebugLocaleConfig UP-TO-DATE
+> Task :app:packageLocalDebugResources UP-TO-DATE
+> Task :app:processLocalDebugNavigationResources UP-TO-DATE
+> Task :app:parseLocalDebugLocalResources UP-TO-DATE
+> Task :app:generateLocalDebugRFile UP-TO-DATE
+> Task :hificore:compileDebugKotlin UP-TO-DATE
+> Task :hificore:compileDebugJavaWithJavac UP-TO-DATE
+> Task :hificore:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :misc:alacdecoder:compileDebugJavaWithJavac UP-TO-DATE
+> Task :misc:alacdecoder:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileLocalDebugKotlin
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/GramophoneAlbumArtProvider.kt:240:55 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/GramophoneAlbumArtProvider.kt:362:63 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/GramophonePlaybackService.kt:844:53 'constructor(p0: MediaSession): MediaSession.ConnectionResult.AcceptedResultBuilder' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/AudioFormatDetector.kt:1084:23 'static field AUDIO_DTS_X: String' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/MediaItemList.kt:27:65 'fun toBundleIncludeLocalConfiguration(): Bundle' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/MediaItemList.kt:40:72 'static fun fromBundle(p0: Bundle): MediaItem' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:90:24 'static fun <T : Any!> checkNotNull(p0: T?): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:103:24 'static fun <T : Any!> checkNotNull(p0: T?, p1: Any): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:117:20 'static fun <T : Any!> checkNotNull(p0: T?): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:120:31 'static fun <T : Any!> checkNotNull(p0: T?): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:126:31 'static fun <T : Any!> checkNotNull(p0: T?): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:139:24 'static fun <T : Any!> checkStateNotNull(p0: T?, p1: Any): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:321:32 'static fun <T : Any!> checkNotNull(p0: T?): T & Any' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:337:37 Java type mismatch because of nullable type argument 'DataSource.Factory?', as not-null 'DataSource.Factory' was expected. This will become an error in a future release. See https://youtrack.jetbrains.com/issue/KTLC-284.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:351:37 Java type mismatch because of nullable type argument 'DataSource.Factory?', as not-null 'DataSource.Factory' was expected. This will become an error in a future release. See https://youtrack.jetbrains.com/issue/KTLC-284.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:365:37 Java type mismatch because of nullable type argument 'DataSource.Factory?', as not-null 'DataSource.Factory' was expected. This will become an error in a future release. See https://youtrack.jetbrains.com/issue/KTLC-284.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:386:37 Java type mismatch because of nullable type argument 'DataSource.Factory?', as not-null 'DataSource.Factory' was expected. This will become an error in a future release. See https://youtrack.jetbrains.com/issue/KTLC-284.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/logic/utils/exoplayer/GramophoneMediaSourceFactory.kt:442:230 'constructor(p0: MediaSource, p1: Long, p2: Long, p3: Boolean, p4: Boolean, p5: Boolean): ClippingMediaSource' is deprecated. Deprecated in Java.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/org/akanework/gramophone/ui/MainActivity.kt:298:77 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/uk/akane/libphonograph/Extensions.kt:69:6 'annotation class BuilderInference : Annotation' is deprecated. BuilderInference annotation must not be used anymore. Builder inference is enabled automatically for builder calls if needed.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/uk/akane/libphonograph/items/MediaItemExtras.kt:34:19 This extension is shadowed by a member: 'field author: CharSequence?' defined in 'androidx.media3.common.MediaMetadata'.
+w: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/java/uk/akane/libphonograph/reader/Reader.kt:710:66 Unnecessary non-null assertion (!!) on a non-null receiver of type 'File'.
+
+> Task :app:compileLocalDebugJavaWithJavac
+> Task :app:checkLocalDebugAarMetadata UP-TO-DATE
+> Task :app:compileLocalDebugNavigationResources UP-TO-DATE
+> Task :app:mergeLocalDebugResources UP-TO-DATE
+
+> Task :app:processLocalDebugMainManifest
+package="org.akanework.gramophone" found in source AndroidManifest.xml: /Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="org.akanework.gramophone" from the source AndroidManifest.xml: /Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/main/AndroidManifest.xml.
+
+> Task :app:processLocalDebugManifest
+> Task :app:processLocalDebugManifestForPackage
+> Task :app:processLocalDebugResources
+> Task :app:bundleLocalDebugClassesToRuntimeJar
+> Task :app:bundleLocalDebugClassesToCompileJar
+
+> Task :app:compileLocalDebugUnitTestKotlin FAILED
+e: file:///Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/src/test/java/org/akanework/gramophone/ui/BaseAdapterClickTest.kt:20:13 Class 'BaseAdapterClickTest.TestAdapter' is not abstract and does not implement abstract base class member:
+fun virtualTitleOf(item: T): String
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileLocalDebugUnitTestKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 15s
+239 actionable tasks: 9 executed, 230 up-to-date
+Configuration cache entry reused.

@@ -1,0 +1,10 @@
+gradle.projectsEvaluated {
+    def app = gradle.rootProject.findProject(':app')
+    if (app != null) {
+        ['compileLocalDebugUnitTestKotlin', 'compileCourseDebugUnitTestKotlin'].each { name ->
+            app.tasks.named(name).configure {
+                setSource(app.files('/private/tmp/gramophone-audit/AuditControlledListTest.kt'))
+            }
+        }
+    }
+}

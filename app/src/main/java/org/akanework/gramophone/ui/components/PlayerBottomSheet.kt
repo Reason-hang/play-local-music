@@ -45,10 +45,6 @@ import androidx.media3.session.MediaController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.motion.MaterialBottomContainerBackHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.akanework.gramophone.BuildConfig
 import org.akanework.gramophone.R
 import org.akanework.gramophone.logic.clone
@@ -89,24 +85,20 @@ class PlayerBottomSheet private constructor(
     private var lastMeasuredHeight: Int? = null
     var visible = false
         set(value) {
-            if (field != value) {
-                field = value
-                // TODO: this should be animated with predictive back once we switch to a better
-                //  back stack.
-                standardBottomSheetBehavior?.state =
-                    if ((instance?.mediaItemCount ?: 0) > 0 && value) {
-                        if (standardBottomSheetBehavior?.state
-                            != BottomSheetBehavior.STATE_EXPANDED
-                        )
-                            BottomSheetBehavior.STATE_COLLAPSED
-                        else BottomSheetBehavior.STATE_EXPANDED
-                    } else {
-                        BottomSheetBehavior.STATE_HIDDEN
-                    }
-            }
+            field = value
+            applyVisibility()
         }
+
+    private fun applyVisibility() {
+        val behavior = standardBottomSheetBehavior ?: return
+        val target = if (!visible) BottomSheetBehavior.STATE_HIDDEN
+            else if (behavior.state == BottomSheetBehavior.STATE_EXPANDED)
+                BottomSheetBehavior.STATE_EXPANDED
+            else BottomSheetBehavior.STATE_COLLAPSED
+        if (behavior.state != target) behavior.state = target
+    }
     val actuallyVisible: Boolean
-        get() = standardBottomSheetBehavior?.state != BottomSheetBehavior.STATE_HIDDEN
+        get() = standardBottomSheetBehavior?.state?.let { it != BottomSheetBehavior.STATE_HIDDEN } ?: false
     val visibleAndExpanded: Boolean
         get() = standardBottomSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED
 
@@ -126,7 +118,8 @@ class PlayerBottomSheet private constructor(
     }
 
     fun open() {
-        if (standardBottomSheetBehavior!!.state == BottomSheetBehavior.STATE_COLLAPSED) {
+        if ((instance?.mediaItemCount ?: 0) > 0 &&
+            standardBottomSheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
             standardBottomSheetBehavior!!.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
@@ -288,6 +281,7 @@ class PlayerBottomSheet private constructor(
             bottomSheetCallback.onStateChanged(this, standardBottomSheetBehavior!!.state)
             lifecycleOwner.lifecycle.addObserver(this)
             updatePeekHeight()
+            applyVisibility()
             dispatchBottomSheetInsets()
         }
     }
@@ -377,28 +371,7 @@ class PlayerBottomSheet private constructor(
         mediaItem: MediaItem?,
         reason: Int,
     ) {
-        val shouldBeHidden = (instance?.mediaItemCount ?: 0) <= 0 || !visible
-        CoroutineScope(Dispatchers.Main).launch {
-            while (standardBottomSheetBehavior?.state == BottomSheetBehavior.STATE_SETTLING) {
-                delay(100)
-            }
-            doOnLayout {
-                val state = standardBottomSheetBehavior?.state
-                val newState = if (!shouldBeHidden) {
-                    if (state != BottomSheetBehavior.STATE_EXPANDED
-                        && state != BottomSheetBehavior.STATE_COLLAPSED) {
-                        BottomSheetBehavior.STATE_COLLAPSED
-                    } else null
-                } else {
-                    BottomSheetBehavior.STATE_HIDDEN
-                }
-                // if we are destroyed after onMediaItemTransition but before this runs,
-                // standardBottomSheetBehavior will be null
-                if (newState != null) {
-                    standardBottomSheetBehavior?.state = newState
-                }
-            }
-        }
+        applyVisibility()
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -409,5 +382,6 @@ class PlayerBottomSheet private constructor(
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         fullPlayer.onStart()
+        applyVisibility()
     }
 }

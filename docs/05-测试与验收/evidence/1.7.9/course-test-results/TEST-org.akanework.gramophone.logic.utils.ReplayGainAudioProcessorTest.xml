@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.utils.ReplayGainAudioProcessorTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:17.239Z" hostname="MacBook-Pro.local" time="0.004">
+  <properties/>
+  <testcase name="externalLoudnessCanBeDisabledBeforePlaybackStarts" classname="org.akanework.gramophone.logic.utils.ReplayGainAudioProcessorTest" time="0.004"/>
+  <testcase name="externalLoudnessUsesFloatPcmCompressionPath" classname="org.akanework.gramophone.logic.utils.ReplayGainAudioProcessorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

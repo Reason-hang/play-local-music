@@ -1,0 +1,6 @@
+{
+  "app/src/main/java/org/akanework/gramophone/logic/library/FavoritePlaylistWriter.kt": "5babbbcaf662e0b0818d9f3497d5a94c83ab6a7c8c438b4978d76f133b05e4e2",
+  "app/src/main/java/org/akanework/gramophone/ui/MainActivity.kt": "292d5521cd2c0e7ec6451a7efd754545216d6662703c87e3f881f1e22a7c7c30",
+  "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt": "a2b122a397619ba9eed3b1b390174620903a2fea33c5604ae6bdaca3aad977af",
+  "app/src/main/java/org/akanework/gramophone/ui/components/PlayerBottomSheet.kt": "b585130e018506639cc9129e1027e67e259f34b22f16fa440b5bc1ba4ba9f7a8"
+}

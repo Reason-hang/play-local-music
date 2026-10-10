@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.artwork.ArtworkResolverTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:15.683Z" hostname="MacBook-Pro.local" time="0.039">
+  <properties/>
+  <testcase name="cacheKeyChangesWhenMediaOrFolderConfigurationChanges" classname="org.akanework.gramophone.logic.artwork.ArtworkResolverTest" time="0.015"/>
+  <testcase name="videoArtworkUriKeepsVideoIdentityAndCacheKey" classname="org.akanework.gramophone.logic.artwork.ArtworkResolverTest" time="0.012"/>
+  <testcase name="sidecarNamesFollowExplicitOfflinePriority" classname="org.akanework.gramophone.logic.artwork.ArtworkResolverTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

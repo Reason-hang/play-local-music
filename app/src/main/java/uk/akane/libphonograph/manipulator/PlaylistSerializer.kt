@@ -79,8 +79,8 @@ object PlaylistSerializer {
         write(context, format, outFile, out, songs)
     }
 
-    @Throws(UnsupportedPlaylistFormatException::class)
-    fun read(outFile: File): Playlist {
+    /** Preserve original path semantics while encoding without reopening the locked file. */
+    fun encode(context: Context, outFile: File, songs: Playlist): ByteArray {
         val format = when (outFile.extension.lowercase()) {
             "m3u", "m3u8" -> PlaylistFormat.M3u
             "xspf" -> PlaylistFormat.Xspf
@@ -88,11 +88,25 @@ object PlaylistSerializer {
             "pls" -> PlaylistFormat.Pls
             else -> throw UnsupportedPlaylistFormatException(outFile.extension)
         }
-        return read(format, outFile)
+        val bytes = ByteArrayOutputStream()
+        write(context, format, outFile, Uri.EMPTY, songs, bytes)
+        return bytes.toByteArray()
     }
 
-    private fun read(format: PlaylistFormat, outFile: File): Playlist {
-        outFile.length().let {
+    @Throws(UnsupportedPlaylistFormatException::class)
+    fun read(outFile: File, content: ByteArray? = null): Playlist {
+        val format = when (outFile.extension.lowercase()) {
+            "m3u", "m3u8" -> PlaylistFormat.M3u
+            "xspf" -> PlaylistFormat.Xspf
+            "wpl" -> PlaylistFormat.Wpl
+            "pls" -> PlaylistFormat.Pls
+            else -> throw UnsupportedPlaylistFormatException(outFile.extension)
+        }
+        return read(format, outFile, content)
+    }
+
+    private fun read(format: PlaylistFormat, outFile: File, content: ByteArray? = null): Playlist {
+        (content?.size?.toLong() ?: outFile.length()).let {
             if (it >= 5L * 1024L * 1024L)
                 throw IllegalArgumentException("The playlist file is too big: ${it / (1024L * 1024L)}MB")
         }
@@ -100,7 +114,7 @@ object PlaylistSerializer {
             PlaylistFormat.M3u -> {
                 val extInfRegex = Regex("#EXTINF:(-?\\d+)(?:\\s+([^,]+))?,(.*)")
                 val tvKeysRegex = Regex("""([\w-]+)="((?:\\.|[^"\\])*)"""")
-                val lines = outFile.readLines()
+                val lines = (content?.inputStream() ?: outFile.inputStream()).bufferedReader().use { it.readLines() }
                 var title: String? = null
                 var titleKey: String? = null
                 var artist: String? = null
@@ -187,7 +201,7 @@ object PlaylistSerializer {
                     album = album, genre = genre, tvKeys = tvKeys)
             }
 
-            PlaylistFormat.Wpl -> outFile.inputStream().use { ist ->
+            PlaylistFormat.Wpl -> (content?.inputStream() ?: outFile.inputStream()).use { ist ->
                 val parser = Xml.newPullParser()
                 parser.setInput(ist, StandardCharsets.UTF_8.name())
                 val items = mutableListOf<Entry>()
@@ -226,7 +240,7 @@ object PlaylistSerializer {
                         }
                         else -> throw XmlPullParserException("Unexpected <head> tag <$tag>")
                     }
-                    parser.nextTag()
+                    if (tag != "title") parser.nextTag()
                     parser.require(XmlPullParser.END_TAG, null, tag)
                 }
                 parser.require(XmlPullParser.END_TAG, null, "head")
@@ -248,7 +262,6 @@ object PlaylistSerializer {
                     parser.nextTag()
                     parser.require(XmlPullParser.END_TAG, null, "media")
                 }
-                parser.nextTag()
                 parser.require(XmlPullParser.END_TAG, null, "seq")
                 parser.nextTag()
                 parser.require(XmlPullParser.END_TAG, null, "body")
@@ -266,7 +279,7 @@ object PlaylistSerializer {
                 val files = SparseArray<String>()
                 val titles = SparseArray<String>()
                 val lengths = SparseArray<Long>()
-                outFile.readLines().forEach {
+                (content?.inputStream() ?: outFile.inputStream()).bufferedReader().use { it.readLines() }.forEach {
                     val fileMatcher = filePattern.matcher(it)
                     if (fileMatcher.matches()) {
                         files.set(fileMatcher.group(1)!!.toInt(),
@@ -292,7 +305,7 @@ object PlaylistSerializer {
                 Playlist(entries)
             }
 
-            PlaylistFormat.Xspf -> outFile.inputStream().use { ist ->
+            PlaylistFormat.Xspf -> (content?.inputStream() ?: outFile.inputStream()).use { ist ->
                 val x0 = "http://xspf.org/ns/0/"
                 val parser = Xml.newPullParser()
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
@@ -609,10 +622,10 @@ object PlaylistSerializer {
         }
     }
 
-    private fun write(context: Context, format: PlaylistFormat, outFile: File, uri: Uri, playlist: Playlist) {
+    private fun write(context: Context, format: PlaylistFormat, outFile: File, uri: Uri, playlist: Playlist, output: java.io.OutputStream? = null) {
         val parent = outFile.parentFile
             ?: throw NullPointerException("parentFile of playlist is null")
-        val os = if (uri.scheme == ContentResolver.SCHEME_FILE)
+        val os = output ?: if (uri.scheme == ContentResolver.SCHEME_FILE)
             outFile.outputStream()
         else MediaStoreCompat.openOutputStream(context, uri, "wt")!!
         os.use { _ ->

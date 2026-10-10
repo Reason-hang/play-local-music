@@ -82,6 +82,7 @@ class PreviewBottomSheet(
             instance?.seekToNext()
         }
 
+        onMediaItemTransition(null, Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED)
         activity.controllerViewModel.addRecreationalPlayerListener(activity.lifecycle, this) {
             onPlaybackStateChanged(instance?.playbackState ?: Player.STATE_IDLE)
             onMediaItemTransition(
@@ -96,14 +97,27 @@ class PreviewBottomSheet(
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
-        if (playbackState == Player.STATE_BUFFERING) return
+        val available = (instance?.mediaItemCount ?: 0) > 0
+        bottomSheetPreviewControllerButton.isEnabled = available &&
+            instance?.isCommandAvailable(Player.COMMAND_PLAY_PAUSE) == true
+        bottomSheetPreviewNextButton.isEnabled = available &&
+            instance?.isCommandAvailable(Player.COMMAND_SEEK_TO_NEXT) == true
+        bottomSheetPreviewControllerButton.alpha = if (bottomSheetPreviewControllerButton.isEnabled) 1f else 0.38f
+        bottomSheetPreviewNextButton.alpha = if (bottomSheetPreviewNextButton.isEnabled) 1f else 0.38f
+        bottomSheetPreviewControllerButton.contentDescription = context.getString(
+            if (instance?.playWhenReady == true) androidx.media3.ui.R.string.exo_controls_pause_description else R.string.play)
+        if (!available) {
+            bottomSheetPreviewControllerButton.icon = AppCompatResources.getDrawable(context, R.drawable.ic_play_arrow_filled)
+            bottomSheetPreviewControllerButton.setTag(R.id.play_next, 0)
+            return
+        }
         val myTag = bottomSheetPreviewControllerButton.getTag(R.id.play_next) as Int?
-        if (instance?.isPlaying == true && myTag != 1) {
+        if (instance?.playWhenReady == true && myTag != 1) {
             bottomSheetPreviewControllerButton.icon =
                 AppCompatResources.getDrawable(context, R.drawable.play_anim)
             bottomSheetPreviewControllerButton.icon.startAnimation()
             bottomSheetPreviewControllerButton.setTag(R.id.play_next, 1)
-        } else if (instance?.isPlaying == false && myTag != 2) {
+        } else if (instance?.playWhenReady != true && myTag != 2) {
             bottomSheetPreviewControllerButton.icon =
                 AppCompatResources.getDrawable(context, R.drawable.pause_anim)
             bottomSheetPreviewControllerButton.icon.startAnimation()
@@ -127,6 +141,14 @@ class PreviewBottomSheet(
                 mediaItem?.mediaMetadata?.artist ?: context.getString(R.string.unknown_artist)
         } else {
             bottomSheetPreviewCover.dispose()
+            bottomSheetPreviewCover.setImageResource(R.drawable.ic_default_cover)
+            bottomSheetPreviewTitle.setText(R.string.empty_player_title)
+            bottomSheetPreviewSubtitle.text = ""
         }
+        onPlaybackStateChanged(instance?.playbackState ?: Player.STATE_IDLE)
+    }
+
+    override fun onAvailableCommandsChanged(availableCommands: Player.Commands) {
+        onPlaybackStateChanged(instance?.playbackState ?: Player.STATE_IDLE)
     }
 }

@@ -1,0 +1,11 @@
+{
+  "documentCount": 7,
+  "localLinksChecked": 27,
+  "tablesChecked": 19,
+  "productionSourceHashChecks": 13,
+  "errors": [],
+  "reportSections": 14,
+  "acceptanceScenarios": 16,
+  "deliveryChecklistItems": 10,
+  "note": "Mechanical document checks only; not functional acceptance. Two semantic review passes recorded in the report."
+}

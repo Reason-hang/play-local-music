@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.BaseAdapterClickTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:17.245Z" hostname="MacBook-Pro.local" time="0.743">
+  <properties/>
+  <testcase name="detachedHolderWithNoPositionDoesNotDispatchClick" classname="org.akanework.gramophone.ui.BaseAdapterClickTest" time="0.742"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

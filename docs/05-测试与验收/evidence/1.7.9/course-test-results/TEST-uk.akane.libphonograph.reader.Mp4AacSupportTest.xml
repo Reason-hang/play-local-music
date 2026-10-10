@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="uk.akane.libphonograph.reader.Mp4AacSupportTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:25.001Z" hostname="MacBook-Pro.local" time="0.007">
+  <properties/>
+  <testcase name="acceptsMp4ExtensionWhenMediaStoreMimeTypeIsMissing" classname="uk.akane.libphonograph.reader.Mp4AacSupportTest" time="0.007"/>
+  <testcase name="acceptsMp4WithAacAudioTrack" classname="uk.akane.libphonograph.reader.Mp4AacSupportTest" time="0.0"/>
+  <testcase name="identifiesVideoTrackForFullPlayerRendering" classname="uk.akane.libphonograph.reader.Mp4AacSupportTest" time="0.0"/>
+  <testcase name="rejectsAacTrackOutsideMp4Container" classname="uk.akane.libphonograph.reader.Mp4AacSupportTest" time="0.0"/>
+  <testcase name="rejectsMp4WithoutAacAudioTrack" classname="uk.akane.libphonograph.reader.Mp4AacSupportTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

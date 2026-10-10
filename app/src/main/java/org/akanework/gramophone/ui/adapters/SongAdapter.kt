@@ -46,6 +46,7 @@ import org.akanework.gramophone.logic.ui.MyRecyclerView
 import org.akanework.gramophone.ui.MediaControllerViewModel
 import org.akanework.gramophone.ui.SongPickerActivity
 import org.akanework.gramophone.ui.components.NowPlayingDrawable
+import org.akanework.gramophone.ui.components.PinnedSongsDecoration
 import org.akanework.gramophone.ui.fragments.ArtistSubFragment
 import org.akanework.gramophone.ui.fragments.DetailDialogFragment
 import org.akanework.gramophone.ui.fragments.GeneralSubFragment
@@ -125,6 +126,13 @@ class SongAdapter(
 
     fun getActivity() = mainActivity
 
+    private var pinnedBoundary: Int? = null
+    private val pinnedDecoration by lazy {
+        PinnedSongsDecoration(this, { pinnedBoundary }, {
+            org.akanework.gramophone.ui.components.CustomGridLayoutManager.FULL_SPAN_COUNT / getSpanSize()
+        })
+    }
+
     private var showFileNames = false
     private var idToPosMap: HashMap<String, List<Int?>>? = null
     private var currentMediaItem: String? = null
@@ -196,6 +204,7 @@ class SongAdapter(
 
     override fun onAttachedToRecyclerView(recyclerView: MyRecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        recyclerView.addItemDecoration(pinnedDecoration)
         if (folder) {
             prefs.registerOnSharedPreferenceChangeListener(this)
             showFileNames = prefs.getBooleanStrict("show_file_names", true)
@@ -203,6 +212,7 @@ class SongAdapter(
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: MyRecyclerView) {
+        recyclerView.removeItemDecoration(pinnedDecoration)
         super.onDetachedFromRecyclerView(recyclerView)
         if (folder)
             prefs.unregisterOnSharedPreferenceChangeListener(this)
@@ -223,6 +233,8 @@ class SongAdapter(
     }
 
     override fun onListUpdated() {
+        pinnedBoundary = SongListSnapshot.pinnedBoundary(getSongList(), ::isUserPinned)
+        recyclerView?.invalidateItemDecorations()
         // TODO run this method on a different thread / in advance
         idToPosMap = hashMapOf()
         list!!.second.forEachIndexed { i, item ->
@@ -244,8 +256,14 @@ class SongAdapter(
                     if (isFavorite) R.string.unfavorite else R.string.favorite
                 )
                 button.setOnClickListener {
-                    Entry.ofMediaItem(item)?.let { entry ->
-                        mainActivity.markIsFavoriteStatus(listOf(entry), !isFavorite(item))
+                    val snapshot = getSongList()
+                    val pos = holder.bindingAdapterPosition
+                    if (pos !in snapshot.indices || snapshot[pos].mediaId != item.mediaId) {
+                        button.isChecked = isFavorite(item)
+                        return@setOnClickListener
+                    }
+                    Entry.ofMediaItem(snapshot[pos])?.let { entry ->
+                        mainActivity.markIsFavoriteStatus(listOf(entry), button.isChecked)
                     }
                 }
             } else {
@@ -278,19 +296,20 @@ class SongAdapter(
             (context as SongPickerActivity).onSelected(item)
             return
         }
+        val songList = getSongList().toList()
+        val selectedIndex = SongListSnapshot.clickedIndex(songList, item, position) ?: return
         val mediaController = mainActivity.getPlayer()
         val title = runBlocking { queueTitle!!.first() }
         mediaController?.apply {
-            val songList = getSongList()
             // If the currently playing song is also the clicked song, then we continue playing the
             // song and open full player, but we still replace the list. This is intended to copy
             // UX of Chinese players that open full player when clicking song, and we don't want
             // this UX to break if list is different for some reason.
             val currentItem = currentMediaItem
-            setMediaItemsSeamlessly(songList, position, title)
+            setMediaItemsSeamlessly(songList, selectedIndex, title)
             prepare()
             play()
-            if (currentItem?.mediaId == songList[position].mediaId) {
+            if (currentItem?.mediaId == songList[selectedIndex].mediaId) {
                 mainActivity.playerBottomSheet.open()
             }
         }
@@ -413,6 +432,9 @@ class SongAdapter(
                 return
             }
         } else {
+            (holder.nowPlaying.drawable as? NowPlayingDrawable?)?.level2Done = null
+            holder.nowPlaying.setImageDrawable(null)
+            holder.nowPlaying.visibility = View.GONE
             super.onBindViewHolder(holder, position, payloads)
             if (currentMediaItem == null || getSongList()[position].mediaId != currentMediaItem)
                 return

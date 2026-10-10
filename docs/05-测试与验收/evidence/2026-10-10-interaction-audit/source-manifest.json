@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-10",
+  "timezone": "Asia/Shanghai",
+  "reportedInstalledVersion": "1.7.7 (user report, installed hash not collected)",
+  "baselineCommit": "67f3ab96ebce7cde6b49b1499c0425927efb0106",
+  "head": "a37911304e78c69802f1f1bd607eee41daed1f6e",
+  "auditTarget": "HEAD plus preserved uncommitted changes; temporary controlled tests",
+  "tests": {
+    "Local": {
+      "name": "org.akanework.gramophone.ui.AuditControlledListTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T10:28:35.628Z",
+      "hostname": "MacBook-Pro.local",
+      "time": "15.045"
+    },
+    "Course": {
+      "name": "org.akanework.gramophone.ui.AuditControlledListTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T10:29:09.467Z",
+      "hostname": "MacBook-Pro.local",
+      "time": "10.969"
+    }
+  },
+  "sourceSha256": {
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/BaseAdapter.kt": "c81a325d3134beedb1159566db6fc34c8c582ee74e18f7986c7655164df4414e",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongAdapter.kt": "d952a86e0eb6ae28e5581248e1ca5645c335e52d6332d617a51a718eb7b1e657",
+    "app/src/main/java/org/akanework/gramophone/ui/MainActivity.kt": "0b7a2599a0eb15a7e431109e3193c055bac77668e6f2f98d36bedefc1eaef6e6",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PlayerBottomSheet.kt": "660f974115a5b90ab6d35f581420713692d9b20744cafb066432b15c5468282f",
+    "app/src/main/java/org/akanework/gramophone/ui/VideoPlayerActivity.kt": "4af4f5951cdd166ae18f955eed8da974fb6abe20f0676248a00727cdc5b95852",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PreviewBottomSheet.kt": "67ed2daa674cd2617e3fbe21a992b77985616791432821884db04c02f6606354",
+    "app/src/main/java/uk/akane/libphonograph/manipulator/ItemManipulator.kt": "33113bcb8203cc59c11d62ae3e173eb701748642dd5fceb2019a40cdd915a3c5",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/SongListSnapshot.kt": "2eae2cfbae8efe85d86d6cb982355a03aba24ef8d1bf8166df5d33a722197a60",
+    "app/src/main/java/org/akanework/gramophone/ui/components/PinnedSongsDecoration.kt": "a5eaa243c1cb58d3971cdf848af97f8ad5a9cad389d7b1b90ea37798d8a42dfc",
+    "app/src/test/java/org/akanework/gramophone/ui/BaseAdapterClickTest.kt": "668060b3b13fc5db8fa09489847d5db6baa6afe12956f99c5eef68f7c49efcf1",
+    "app/src/test/java/org/akanework/gramophone/ui/PinnedSongsDecorationTest.kt": "93aaf13aeb9bfeaab951bb429d21965e3dc213d00d089fd2a0c27433f899aaa5",
+    "app/src/test/java/org/akanework/gramophone/ui/SongListSnapshotTest.kt": "ee98784ca15061394754ef01b7ead16ff11e491d52733b84bffd195ccff2f760",
+    "app/build.gradle.kts": "ba33fdf200d4a597dc04d4ce7c56017e99569b0630e0ea2540f9917fe7a656a0"
+  }
+}

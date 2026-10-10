@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.InteractionBehaviorTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:44:52.283Z" hostname="MacBook-Pro.local" time="8.424">
+  <properties/>
+  <testcase name="translatedCentralButtonKeepsItsOriginalSingleClickAction" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.523"/>
+  <testcase name="centralDoubleTapPausesOnceAndNextDoubleTapResumesOnce" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.096"/>
+  <testcase name="bufferingDoubleTapPausesPlaybackIntent" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.052"/>
+  <testcase name="favoriteAddIsIdempotentAndRemovePreservesOtherEntries" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.01"/>
+  <testcase name="savedStateRetainsActiveAndQueuedFavoriteTargets" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.635"/>
+  <testcase name="singleTapDoesNotTogglePlayback" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.1"/>
+  <testcase name="progressBarInsideCentralRegionRetainsItsOwnTouchHandling" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.063"/>
+  <testcase name="homepageBarIsCollapsedWithoutQueueAndDoesNotDependOnScrolling" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="6.851"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

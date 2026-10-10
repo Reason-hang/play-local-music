@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">多听课程</string>
+    <!-- Chinese product copy follows the existing main resource fallback policy. -->
+    <string name="empty_player_title" tools:ignore="MissingTranslation">请选择课程</string>
 </resources>

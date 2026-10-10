@@ -59,6 +59,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import org.akanework.gramophone.logic.library.FavoritePlaylistWriter
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.Log
@@ -141,6 +142,9 @@ class MainActivity : BaseActivity() {
     private var pendingPlaylistRequest: Bundle? = null
     private var pendingDeleteRequest: Bundle? = null
     private var pendingMarkIsFavoriteRequest: Bundle? = null
+    private val favoriteRequests = ArrayDeque<Bundle>()
+    private var favoriteRequestRunning = false
+    private var activeFavoriteRequest: Bundle? = null
 
     fun updateLibrary(smartScanFirst: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R,
                       then: (() -> Unit)? = null) {
@@ -175,6 +179,8 @@ class MainActivity : BaseActivity() {
         if (savedInstanceState?.containsKey("pendingMarkIsFavoriteRequest") == true) {
             pendingMarkIsFavoriteRequest = savedInstanceState.getBundle("pendingMarkIsFavoriteRequest")
         }
+        BundleCompat.getParcelableArrayList(savedInstanceState ?: Bundle(),
+            "queuedFavoriteRequests", Bundle::class.java)?.let(favoriteRequests::addAll)
         intentSenderDelete =
             registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
                 val req = pendingDeleteRequest
@@ -194,12 +200,19 @@ class MainActivity : BaseActivity() {
                 }
             }
         markIsFavoriteStatusIntentSender =
-            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-                val req = pendingMarkIsFavoriteRequest
-                    ?: throw IllegalStateException("pending favorite request is null")
+            registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+                val req = pendingMarkIsFavoriteRequest ?: return@registerForActivityResult
                 pendingMarkIsFavoriteRequest = null
-                CoroutineScope(Dispatchers.Default).launch {
-                    doMarkIsFavoriteStatus(it.resultCode, req)
+                lifecycleScope.launch {
+                    favoriteRequestRunning = true
+                    activeFavoriteRequest = req
+                    try { withContext(Dispatchers.IO) { doMarkIsFavoriteStatus(result.resultCode, req) } }
+                    finally {
+                        activeFavoriteRequest = null
+                        favoriteRequestRunning = false
+                        if (lifecycle.currentState != androidx.lifecycle.Lifecycle.State.DESTROYED)
+                            drainFavoriteRequests()
+                    }
                 }
             }
         // TODO: should Activity.setMediaController() or Activity.setVolumeControlStream() be
@@ -232,6 +245,8 @@ class MainActivity : BaseActivity() {
             })
         }
         playerBottomSheet = findViewById(R.id.player_layout)
+
+        lifecycleScope.launch { drainFavoriteRequests() }
 
         // Check all permissions.
         if (!hasAudioPermission() || (hasScopedStorageWithMediaTypes() && !hasVideoPermission())) {
@@ -363,37 +378,55 @@ class MainActivity : BaseActivity() {
     }
 
     fun markIsFavoriteStatus(songs: List<Entry>, favorite: Boolean) {
-        CoroutineScope(Dispatchers.Default).launch {
-            val uri = gramophoneApplication.reader.playlistListFlow.map { it.find { p -> p is
-                    Favorite } }.first()?.id?.let {
-                    ContentUris.withAppendedId(@Suppress("deprecation")
-                    MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, it)
-                }
-            val data = Bundle().apply {
+        if (songs.isEmpty()) return
+        lifecycleScope.launch {
+            favoriteRequests.addLast(Bundle().apply {
                 putParcelableArrayList("Songs", ArrayList(songs))
-                putParcelable("Uri", uri)
                 putBoolean("Favorite", favorite)
-            }
-            val token = if (uri != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                MediaStoreCompat.needRequestAdoption(this@MainActivity, uri)
-            } else if (uri != null) {
-                MediaStoreCompat.needRequestBytesWrite(this@MainActivity, uri)
-            } else {
-                MediaStoreCompat.needRequestCreate(this@MainActivity,
-                    ItemManipulator.getDefaultPlaylistFile(
-                        ItemManipulator.FAVORITES).path)
-            }
-            if (token != null) {
-                pendingMarkIsFavoriteRequest = data
-                val pendingIntent = MediaStoreCompat.createWriteRequest(this@MainActivity,
-                    listOf(token))
-                markIsFavoriteStatusIntentSender.launch(
-                    IntentSenderRequest.Builder(pendingIntent.intentSender).build()
-                )
-            } else {
-                doMarkIsFavoriteStatus(RESULT_OK, data)
-            }
+            })
+            drainFavoriteRequests()
         }
+    }
+
+    private suspend fun drainFavoriteRequests() {
+        if (favoriteRequestRunning || pendingMarkIsFavoriteRequest != null) return
+        favoriteRequestRunning = true
+        try {
+            while (favoriteRequests.isNotEmpty() && pendingMarkIsFavoriteRequest == null) {
+                val data = favoriteRequests.removeFirst()
+                activeFavoriteRequest = data
+                try {
+                    val (uri, token) = withContext(Dispatchers.IO) {
+                        val uri = gramophoneApplication.reader.playlistListFlow.first()
+                            .firstOrNull { it is Favorite }?.id?.let {
+                                ContentUris.withAppendedId(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, it)
+                            }
+                        val token = when {
+                            uri != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+                                MediaStoreCompat.needRequestAdoption(this@MainActivity, uri)
+                            uri != null -> MediaStoreCompat.needRequestBytesWrite(this@MainActivity, uri)
+                            else -> MediaStoreCompat.needRequestCreate(this@MainActivity,
+                                ItemManipulator.getDefaultPlaylistFile(ItemManipulator.FAVORITES).path)
+                        }
+                        uri to token
+                    }
+                    data.putParcelable("Uri", uri)
+                    if (token != null) {
+                        pendingMarkIsFavoriteRequest = data
+                        val intent = withContext(Dispatchers.IO) {
+                            MediaStoreCompat.createWriteRequest(this@MainActivity, listOf(token))
+                        }
+                        markIsFavoriteStatusIntentSender.launch(IntentSenderRequest.Builder(intent.intentSender).build())
+                    } else withContext(Dispatchers.IO) { doMarkIsFavoriteStatus(RESULT_OK, data) }
+                } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    pendingMarkIsFavoriteRequest = null
+                    Toast.makeText(this, getString(R.string.edit_favorites_failed,
+                        error.javaClass.simpleName), Toast.LENGTH_LONG).show()
+                } finally { activeFavoriteRequest = null }
+            }
+        } finally { favoriteRequestRunning = false }
     }
 
     fun runIntentForDelete(intent: IntentSender, bundle: Bundle) {
@@ -413,27 +446,14 @@ class MainActivity : BaseActivity() {
 
     private suspend fun doMarkIsFavoriteStatus(resultCode: Int, data: Bundle) {
         if (resultCode == RESULT_OK) {
-            var uriIn = BundleCompat.getParcelable(data, "Uri", Uri::class.java)
-            if (uriIn != null) {
-                uriIn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    MediaStoreCompat.adoptFile(this@MainActivity, uriIn)
-                } else uriIn
-            }
-            val songs = BundleCompat.getParcelableArrayList(data, "Songs",
-                Entry::class.java)!!
-            val favorite = data.getBoolean("Favorite")
             try {
-                val uri = uriIn ?: ItemManipulator.createPlaylist(this,
-                    ItemManipulator.getDefaultPlaylistFile(ItemManipulator.FAVORITES))
-                val readback = if (uriIn != null) ItemManipulator.readbackPlaylist(this,
-                    uri) else PlaylistSerializer.Playlist.create()
-                val newSongs = readback.copy(entries = if (favorite) {
-                    readback.entries + songs
-                } else {
-                    readback.entries.filter { songs.find { candidate -> candidate.fuzzyEquals(it) } == null }
-                })
-                ItemManipulator.setPlaylistContent(this, uri, newSongs,
-                    uriIn == null)
+                var uriIn = BundleCompat.getParcelable(data, "Uri", Uri::class.java)
+                if (uriIn != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    uriIn = MediaStoreCompat.adoptFile(this@MainActivity, uriIn)
+                val songs = BundleCompat.getParcelableArrayList(data, "Songs", Entry::class.java).orEmpty()
+                FavoritePlaylistWriter.update(this, uriIn, songs, data.getBoolean("Favorite"))
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Log.e("MainActivity", Log.getThrowableString(e)!!)
                 withContext(Dispatchers.Main) {
@@ -508,6 +528,10 @@ class MainActivity : BaseActivity() {
         if (pendingMarkIsFavoriteRequest != null) {
             outState.putBundle("pendingMarkIsFavoriteRequest", pendingMarkIsFavoriteRequest)
         }
+        outState.putParcelableArrayList("queuedFavoriteRequests", ArrayList<Bundle>().apply {
+            if (pendingMarkIsFavoriteRequest == null) activeFavoriteRequest?.let(::add)
+            addAll(favoriteRequests)
+        })
     }
 
     override fun onNewIntent(intent: Intent) {

@@ -134,6 +134,7 @@ import org.akanework.gramophone.logic.utils.LrcUtils.LrcParserOptions
 import org.akanework.gramophone.logic.utils.LrcUtils.extractAndParseLyrics
 import org.akanework.gramophone.logic.utils.LrcUtils.loadAndParseLyricsFile
 import org.akanework.gramophone.logic.utils.MediaItemList
+import org.akanework.gramophone.logic.library.FavoritePlaylistWriter
 import org.akanework.gramophone.logic.utils.ReplayGainAudioProcessor
 import org.akanework.gramophone.logic.utils.ReplayGainUtil
 import org.akanework.gramophone.logic.utils.SemanticLyrics
@@ -735,19 +736,8 @@ class GramophonePlaybackService : MediaLibraryService(), MediaSessionService.Lis
             var error: Exception? = null
             if (token == null) {
                 try {
-                    val uri = uriIn ?: ItemManipulator.createPlaylist(
-                        this@GramophonePlaybackService, ItemManipulator
-                            .getDefaultPlaylistFile(ItemManipulator.FAVORITES))
-                    val readback = if (uriIn != null) ItemManipulator.readbackPlaylist(
-                        this@GramophonePlaybackService, uri) else
-                            PlaylistSerializer.Playlist.create()
-                    val newSongs = if (rating.isHeart) {
-                        readback.entries + song
-                    } else {
-                        readback.entries.filter { !song.fuzzyEquals(it) }
-                    }
-                    ItemManipulator.setPlaylistContent(this@GramophonePlaybackService, uri,
-                        readback.copy(entries = newSongs), uriIn == null)
+                    FavoritePlaylistWriter.update(this@GramophonePlaybackService,
+                        uriIn, listOf(song), rating.isHeart)
                 } catch (e: Exception) {
                     Log.e(TAG, "failed to set $rating on $mediaId", e)
                     error = e

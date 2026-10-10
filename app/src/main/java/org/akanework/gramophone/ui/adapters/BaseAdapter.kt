@@ -149,15 +149,18 @@ abstract class BaseAdapter<T : Any>(
                     val baseComparator = cmp ?: compareBy<T> {
                         baseOrder[toId(it)] ?: Int.MAX_VALUE
                     }
+                    // Sorting runs off the UI thread. Freeze pin values for this comparison pass.
+                    val userPins = associate { toId(it) to
+                        if (isUserPinned(it)) getUserPinnedOrder(it) else null }
                     sortWith { o1, o2 ->
                         if (isPinned(o1) && !isPinned(o2)) -1
                         else if (!isPinned(o1) && isPinned(o2)) 1
                         else if (isPinned(o1) && isPinned(o2))
                             compareBy<T> { getPinnedOrder(it) }.compare(o1, o2)
-                        else if (isUserPinned(o1) && !isUserPinned(o2)) -1
-                        else if (!isUserPinned(o1) && isUserPinned(o2)) 1
-                        else if (isUserPinned(o1) && isUserPinned(o2))
-                            compareBy<T> { getUserPinnedOrder(it) }.compare(o1, o2)
+                        else if (userPins[toId(o1)] != null && userPins[toId(o2)] == null) -1
+                        else if (userPins[toId(o1)] == null && userPins[toId(o2)] != null) 1
+                        else if (userPins[toId(o1)] != null && userPins[toId(o2)] != null)
+                            compareValues(userPins[toId(o1)], userPins[toId(o2)])
                         else baseComparator.compare(o1, o2)
                     }
                 }.toList()
@@ -376,7 +379,7 @@ abstract class BaseAdapter<T : Any>(
         }
         holder.itemView.setOnClickListener {
             val pos = holder.bindingAdapterPosition
-            if (pos < getItemCount())
+            if (pos in 0 until getItemCount())
                 onClick(item, pos)
         }
         if (hasMenu) {

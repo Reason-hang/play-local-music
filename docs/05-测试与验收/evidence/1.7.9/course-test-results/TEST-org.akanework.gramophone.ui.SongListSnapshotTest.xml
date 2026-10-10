@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.SongListSnapshotTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:24.234Z" hostname="MacBook-Pro.local" time="0.075">
+  <properties/>
+  <testcase name="duplicatePlaylistOccurrenceKeepsItsPosition" classname="org.akanework.gramophone.ui.SongListSnapshotTest" time="0.013"/>
+  <testcase name="everyPinUnpinAndSortOrderSelectsTheClickedIdentity" classname="org.akanework.gramophone.ui.SongListSnapshotTest" time="0.012"/>
+  <testcase name="boundSongWinsOverStalePositionAfterPinMove" classname="org.akanework.gramophone.ui.SongListSnapshotTest" time="0.023"/>
+  <testcase name="filtersAndRefreshNeverSubstituteAnotherSong" classname="org.akanework.gramophone.ui.SongListSnapshotTest" time="0.011"/>
+  <testcase name="pinBoundaryRequiresBothSectionsAndNeverAddsQueueEntries" classname="org.akanework.gramophone.ui.SongListSnapshotTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

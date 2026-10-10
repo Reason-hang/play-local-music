@@ -226,7 +226,7 @@ class EndedWorkaroundPlayer(
                     mediaItems.subList(0, startIndex)
                 )
             super.handleReplaceMediaItems(
-                startIndex, startIndex,
+                startIndex, startIndex + 1,
                 listOf(mediaItems[startIndex])
             )
             if (isLast) {

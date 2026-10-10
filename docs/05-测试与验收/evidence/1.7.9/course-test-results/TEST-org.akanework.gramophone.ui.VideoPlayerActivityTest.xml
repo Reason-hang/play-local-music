@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.VideoPlayerActivityTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-10T11:45:24.311Z" hostname="MacBook-Pro.local" time="0.076">
+  <properties/>
+  <testcase name="fullScreenVideoPageHasBackControlAndLandscapeContract" classname="org.akanework.gramophone.ui.VideoPlayerActivityTest" time="0.065"/>
+  <testcase name="hiddenMedia3SpeedAdapterKeepsItsRequiredSevenEntryContract" classname="org.akanework.gramophone.ui.VideoPlayerActivityTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
