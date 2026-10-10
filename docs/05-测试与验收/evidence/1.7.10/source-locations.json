@@ -1,0 +1,283 @@
+[
+  {
+    "path": "app/build.gradle.kts",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "cc64dc36e7ba58ad2eef86a42a07aa013807db3da5932d30de04e980a649ff06",
+    "locations": [
+      {
+        "line": 23,
+        "text": "fun resolveProperties(property: String): String? {"
+      },
+      {
+        "line": 112,
+        "text": "versionCode = 43"
+      },
+      {
+        "line": 113,
+        "text": "versionName = \"1.7.10\""
+      },
+      {
+        "line": 362,
+        "text": "fun String.runCommand("
+      },
+      {
+        "line": 369,
+        "text": "fun readProperties(propertiesFile: File) = Properties().apply {"
+      }
+    ]
+  },
+  {
+    "path": "app/src/main/java/org/akanework/gramophone/ui/adapters/ViewPager2Adapter.kt",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "ceeaa0b0eae78add055e80dad2c1db377e7c435a3b01f1007303ba0db0c2edc1",
+    "locations": [
+      {
+        "line": 59,
+        "text": "override fun onDestroy(owner: LifecycleOwner) {"
+      },
+      {
+        "line": 64,
+        "text": "override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {"
+      },
+      {
+        "line": 84,
+        "text": "fun getLabelResId(position: Int) = tabs[position]!!.label"
+      },
+      {
+        "line": 86,
+        "text": "override fun getItemCount() = tabs.indexOf(null)"
+      },
+      {
+        "line": 89,
+        "text": "override fun createFragment(position: Int): Fragment ="
+      },
+      {
+        "line": 96,
+        "text": "override fun getItemId(position: Int): Long {"
+      },
+      {
+        "line": 100,
+        "text": "override fun containsItem(itemId: Long): Boolean {"
+      },
+      {
+        "line": 113,
+        "text": "FileSystem(R.id.detailed_folders, R.string.filesystem),"
+      },
+      {
+        "line": 117,
+        "text": "fun mapSettingToTabList(setting: String): List<Tab?> {"
+      },
+      {
+        "line": 125,
+        "text": "if (t in setOf(Tab.Albums, Tab.Genres, Tab.Dates, Tab.FileSystem)) listOf() else listOf(t)"
+      },
+      {
+        "line": 134,
+        "text": "if (!stList.contains(it) && it !in setOf(Tab.Albums, Tab.Genres, Tab.Dates, Tab.FileSystem))"
+      },
+      {
+        "line": 147,
+        "text": "fun mapTabListToSetting(tabList: List<Tab?>) = tabList.joinToString(\",\") { it?.name ?: \"\" }"
+      }
+    ]
+  },
+  {
+    "path": "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "40d79824a9a97d47a1b226c24c0b31290b353959a59c2047de94ba7bfa4359c4",
+    "locations": [
+      {
+        "line": 20,
+        "text": "override fun onDown(e: MotionEvent) = true"
+      },
+      {
+        "line": 21,
+        "text": "override fun onSingleTapConfirmed(e: MotionEvent): Boolean {"
+      },
+      {
+        "line": 27,
+        "text": "override fun onDoubleTap(e: MotionEvent): Boolean {"
+      },
+      {
+        "line": 41,
+        "text": "override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {"
+      },
+      {
+        "line": 49,
+        "text": "override fun onTouchEvent(event: MotionEvent): Boolean {"
+      },
+      {
+        "line": 57,
+        "text": "private fun controlAt(group: ViewGroup, x: Float, y: Float): View? {"
+      },
+      {
+        "line": 70,
+        "text": "private fun acceptsPlaybackGesture(x: Float, y: Float): Boolean {"
+      },
+      {
+        "line": 76,
+        "text": "private fun cancelGesture() {"
+      },
+      {
+        "line": 82,
+        "text": "override fun onWindowFocusChanged(hasWindowFocus: Boolean) {"
+      },
+      {
+        "line": 90,
+        "text": "override fun onDetachedFromWindow() {"
+      }
+    ]
+  },
+  {
+    "path": "app/src/main/res/xml/settings_appearance.xml",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "02b4d1f2a6ded06c615c341a60d3df24b0e9065f8dc545116f1bc1be2210bd62",
+    "locations": []
+  },
+  {
+    "path": "app/src/test/java/org/akanework/gramophone/ui/HomeTabsRegressionTest.kt",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "d0d300e201ff70f3d2a615331a316774c1d35f4398d55ec6ae87730382b784dd",
+    "locations": [
+      {
+        "line": 16,
+        "text": "@Test fun defaultHomepageKeepsFourDistinctMediaEntrances() {"
+      },
+      {
+        "line": 19,
+        "text": "@Test fun legacyTabOrderPreservesVisibleAndHiddenChoicesWhileRemovingFilesystem() {"
+      },
+      {
+        "line": 21,
+        "text": "mapSettingToTabList(\"Folders,FileSystem,Songs,,Artists,Playlist\"))"
+      },
+      {
+        "line": 22,
+        "text": "assertFalse(TabOrderPreference.TabOrderAdapter(\"FileSystem,Songs,Folders,Artists,Playlist,\").value.contains(Tab.FileSystem))"
+      },
+      {
+        "line": 24,
+        "text": "@Test fun legacyFilesystemOnlyHomepageFallsBackToSongsInsteadOfEmptyPage() {"
+      },
+      {
+        "line": 25,
+        "text": "val tabs = mapSettingToTabList(\"FileSystem,,Songs,Artists,Folders,Playlist\")"
+      },
+      {
+        "line": 28,
+        "text": "assertFalse(tabs.contains(Tab.FileSystem))"
+      },
+      {
+        "line": 30,
+        "text": "@Test fun tabOrderSettingsRenderFourLabelsWithoutRewritingLegacyPreference() {"
+      },
+      {
+        "line": 34,
+        "text": "val legacy = \"Songs,Artists,Folders,FileSystem,Playlist,\""
+      }
+    ]
+  },
+  {
+    "path": "app/src/test/java/org/akanework/gramophone/ui/InteractionBehaviorTest.kt",
+    "commit": "7c508ed4c28de663411a4e8fe586bb3415aea984",
+    "sha256": "59dbb250dbaa9dd0891a742f6eabe212aaa8f7160d7d3c4a77d948b9339418e9",
+    "locations": [
+      {
+        "line": 28,
+        "text": "private fun attachForClicks(view: View) {"
+      },
+      {
+        "line": 34,
+        "text": "@org.junit.After fun closeTouchWindows() {"
+      },
+      {
+        "line": 45,
+        "text": "override fun getState() = snapshot"
+      },
+      {
+        "line": 46,
+        "text": "override fun handleSetPlayWhenReady(playWhenReady: Boolean): com.google.common.util.concurrent.ListenableFuture<*> {"
+      },
+      {
+        "line": 52,
+        "text": "private fun tap(view: View, time: Long, x: Float = 500f, y: Float = 300f) {"
+      },
+      {
+        "line": 58,
+        "text": "private fun video(player: Player): VideoGesturePlayerView {"
+      },
+      {
+        "line": 67,
+        "text": "@Test fun centralDoubleTapPausesOnceAndNextDoubleTapResumesOnce() {"
+      },
+      {
+        "line": 78,
+        "text": "@Test fun bufferingDoubleTapPausesPlaybackIntent() {"
+      },
+      {
+        "line": 85,
+        "text": "@Test fun singleTapDoesNotTogglePlayback() {"
+      },
+      {
+        "line": 92,
+        "text": "@Test fun progressBarInsideCentralRegionRetainsItsOwnTouchHandling() {"
+      },
+      {
+        "line": 102,
+        "text": "@Test fun translatedCentralButtonKeepsItsOriginalSingleClickAction() {"
+      },
+      {
+        "line": 114,
+        "text": "private fun fullScreen(player: Player): View {"
+      },
+      {
+        "line": 123,
+        "text": "private fun physicalTap(view: View, x: Float, y: Float) {"
+      },
+      {
+        "line": 131,
+        "text": "@Test fun actualFullscreenLayoutWithVisibleControlsDoubleTapPausesAndResumes() {"
+      },
+      {
+        "line": 148,
+        "text": "@Test fun actualFullscreenLayoutWithHiddenControlsDoubleTapPauses() {"
+      },
+      {
+        "line": 158,
+        "text": "@Test fun recordedRedmiRightOfCenterDoubleTapWorksWithVisibleAndHiddenControls() {"
+      },
+      {
+        "line": 178,
+        "text": "@Test fun fullscreenBlankLeftAreaAlsoRecognizesDoubleTap() {"
+      },
+      {
+        "line": 188,
+        "text": "@Test fun doubleTapOnOtherCentralButtonDoesNotTogglePlayback() {"
+      },
+      {
+        "line": 204,
+        "text": "@Test fun fullscreenBackAndSpeedControlsKeepTheirClickActions() {"
+      },
+      {
+        "line": 218,
+        "text": "@Test fun interveningControlTapCannotCombineTwoPictureTapsIntoDoubleTap() {"
+      },
+      {
+        "line": 236,
+        "text": "@Test fun disabledPlayPauseControlCannotBecomePictureDoubleTap() {"
+      },
+      {
+        "line": 252,
+        "text": "@Test fun favoriteAddIsIdempotentAndRemovePreservesOtherEntries() {"
+      },
+      {
+        "line": 260,
+        "text": "@Test fun savedStateRetainsActiveAndQueuedFavoriteTargets() {"
+      },
+      {
+        "line": 274,
+        "text": "@Test fun homepageBarIsCollapsedWithoutQueueAndDoesNotDependOnScrolling() {"
+      }
+    ]
+  }
+]

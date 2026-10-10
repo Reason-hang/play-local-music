@@ -1,0 +1,36 @@
+[
+  {
+    "app": "本地听歌",
+    "package": "org.akanework.gramophone",
+    "versionName": "1.7.10",
+    "versionCode": 43,
+    "path": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/outputs/本地听歌-1.7.10.apk",
+    "source": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/build/outputs/apk/local/nonMinifiedRelease/本地听歌-1.7.10-local-nonMinifiedRelease.apk",
+    "sha256": "f99797490c69d2b0b00bca44d488a7cd88e59ab76d398fac0e829e6fce252f65",
+    "certificateSha256": "75f7f5d3d941a646abdd9c981afedbdba6215a8e0533a94dfebd3d950fee2b1c",
+    "sizeBytes": 66368098,
+    "debuggable": false,
+    "zip": true,
+    "zipalign": true,
+    "v1": true,
+    "v2": true,
+    "signatureMatches177": true
+  },
+  {
+    "app": "多听课程",
+    "package": "org.akanework.gramophone.course",
+    "versionName": "1.7.10",
+    "versionCode": 43,
+    "path": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/outputs/多听课程-1.7.10.apk",
+    "source": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/app/build/outputs/apk/course/nonMinifiedRelease/本地听歌-1.7.10-course-nonMinifiedRelease.apk",
+    "sha256": "882e7d02eb380e019e5652b0fc7f426a50bab57b3872280911d3d230a64e27f1",
+    "certificateSha256": "75f7f5d3d941a646abdd9c981afedbdba6215a8e0533a94dfebd3d950fee2b1c",
+    "sizeBytes": 66471651,
+    "debuggable": false,
+    "zip": true,
+    "zipalign": true,
+    "v1": true,
+    "v2": true,
+    "signatureMatches177": true
+  }
+]

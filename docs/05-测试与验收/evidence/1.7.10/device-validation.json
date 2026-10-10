@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-10",
+  "model": "24122RKC7C",
+  "api": 36,
+  "localCandidate": {
+    "versionName": "1.7.10.gesture-check",
+    "versionCode": 43,
+    "result": "用户确认显示和隐藏控制栏时均能暂停、继续"
+  },
+  "finalApks": {
+    "versionName": "1.7.10",
+    "versionCode": 43,
+    "installed": false,
+    "result": "用户回复手机已拔下，先交付APK；不等待最终安装与课程真机"
+  },
+  "dataRetention": "候选覆盖未卸载/未清数据；完整逐字段对照未执行"
+}

@@ -1,3 +1,5 @@
+> 审查时点快照：下文形成于最终全量之前；之后双Flavor各120项与Lint均已完成。当前交付状态见验证记录与09报告。
+
 # 全份文档一致性只读复核
 
 审查日期：2026-10-10。范围：根目录 readme.md、readme_ja.md、docs 中全部 20 份 Markdown（历史台账与历史审计按其时间范围解读）。只读核对，并抽查 ViewPager2Adapter 与 VideoGesturePlayerView；未修改工程、未运行 Gradle／ADB、未提交。

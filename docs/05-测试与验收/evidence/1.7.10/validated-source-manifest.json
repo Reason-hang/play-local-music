@@ -40,6 +40,7 @@
     "model": "24122RKC7C",
     "api": 36,
     "localCandidate": "用户确认显示/隐藏均暂停继续；1.7.10.gesture-check/43",
-    "courseFinal": "待正式包复核"
-  }
+    "courseFinal": "用户已拔下手机并要求先交付APK；正式双包最终安装、课程真实手指与首页真机待验"
+  },
+  "validatedSourceCommit": "7c508ed4c28de663411a4e8fe586bb3415aea984"
 }
