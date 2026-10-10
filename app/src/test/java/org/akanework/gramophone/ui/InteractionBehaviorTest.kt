@@ -24,6 +24,17 @@ import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 class InteractionBehaviorTest {
+    private val touchWindows = mutableListOf<org.robolectric.android.controller.ActivityController<android.app.Activity>>()
+    private fun attachForClicks(view: View) {
+        val activity = Robolectric.buildActivity(android.app.Activity::class.java).create().start().resume().visible()
+        touchWindows.add(activity)
+        activity.get().setContentView(view)
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+    @org.junit.After fun closeTouchWindows() {
+        touchWindows.forEach { it.pause().stop().destroy() }
+    }
+
     private class TestPlayer(ready: Boolean, state: Int = Player.STATE_READY) : SimpleBasePlayer(Looper.getMainLooper()) {
         var commands = 0
         private var snapshot = State.Builder()
@@ -47,6 +58,7 @@ class InteractionBehaviorTest {
     private fun video(player: Player): VideoGesturePlayerView {
         val context = ContextThemeWrapper(RuntimeEnvironment.getApplication(), R.style.Theme_Gramophone)
         return VideoGesturePlayerView(context, null).apply {
+            setControllerAnimationEnabled(false)
             this.player = player
             measure(View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(600, View.MeasureSpec.EXACTLY))
             layout(0,0,1000,600)
@@ -94,9 +106,148 @@ class InteractionBehaviorTest {
         view.addView(button,android.widget.FrameLayout.LayoutParams(100,80).apply { leftMargin=350;topMargin=250 })
         view.measure(View.MeasureSpec.makeMeasureSpec(1000,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(600,View.MeasureSpec.EXACTLY))
         view.layout(0,0,1000,600)
+        attachForClicks(view)
         tap(view,android.os.SystemClock.uptimeMillis(),500f,290f)
         shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(500))
         assertEquals(1,clicks)
+    }
+    private fun fullScreen(player: Player): View {
+        val context = ContextThemeWrapper(RuntimeEnvironment.getApplication(), R.style.Theme_Gramophone)
+        return android.view.LayoutInflater.from(context).inflate(R.layout.activity_video_player, null).apply {
+            findViewById<VideoGesturePlayerView>(R.id.video_player).apply { setControllerAnimationEnabled(false); this.player = player }
+            measure(View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY))
+            layout(0,0,2400,1080)
+        }
+    }
+    private fun physicalTap(view: View, x: Float, y: Float) {
+        val time = android.os.SystemClock.uptimeMillis()
+        val down = MotionEvent.obtain(time,time,MotionEvent.ACTION_DOWN,x,y,0)
+        assertTrue(view.dispatchTouchEvent(down));down.recycle()
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(45))
+        val up = MotionEvent.obtain(time,android.os.SystemClock.uptimeMillis(),MotionEvent.ACTION_UP,x,y,0)
+        assertTrue(view.dispatchTouchEvent(up));up.recycle()
+    }
+    @Test fun actualFullscreenLayoutWithVisibleControlsDoubleTapPausesAndResumes() {
+        val player = TestPlayer(true)
+        val root = fullScreen(player)
+        val view = root.findViewById<VideoGesturePlayerView>(R.id.video_player)
+        view.showController()
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(70))
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertEquals("Actual fullscreen double tap must dispatch exactly once",1,player.commands)
+        assertFalse(player.playWhenReady)
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(70))
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertTrue(player.playWhenReady);assertEquals(2,player.commands)
+    }
+    @Test fun actualFullscreenLayoutWithHiddenControlsDoubleTapPauses() {
+        val player = TestPlayer(true)
+        val root = fullScreen(player)
+        root.findViewById<VideoGesturePlayerView>(R.id.video_player).hideController()
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(70))
+        physicalTap(root,1200f,540f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertFalse(player.playWhenReady);assertEquals(1,player.commands)
+    }
+    @Test fun recordedRedmiRightOfCenterDoubleTapWorksWithVisibleAndHiddenControls() {
+        for (visible in listOf(true,false)) {
+            val player = TestPlayer(true)
+            val root = fullScreen(player)
+            val view = root.findViewById<VideoGesturePlayerView>(R.id.video_player)
+            if (visible) view.showController() else view.hideController()
+            physicalTap(root,1726f,518f)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(97))
+            physicalTap(root,1739f,499f)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+            assertEquals("visible=$visible",1,player.commands)
+            assertFalse(player.playWhenReady)
+            physicalTap(root,1946f,379f)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(113))
+            physicalTap(root,1945f,366f)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+            assertEquals("visible=$visible",2,player.commands)
+            assertTrue(player.playWhenReady)
+        }
+    }
+    @Test fun fullscreenBlankLeftAreaAlsoRecognizesDoubleTap() {
+        val player = TestPlayer(true)
+        val root = fullScreen(player)
+        root.findViewById<VideoGesturePlayerView>(R.id.video_player).hideController()
+        physicalTap(root,300f,400f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(90))
+        physicalTap(root,310f,405f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertEquals(1,player.commands);assertFalse(player.playWhenReady)
+    }
+    @Test fun doubleTapOnOtherCentralButtonDoesNotTogglePlayback() {
+        val player = TestPlayer(true)
+        val view = video(player)
+        view.setControllerAnimationEnabled(false)
+        var clicks = 0
+        val button = android.widget.Button(view.context).apply { setOnClickListener { clicks++ } }
+        view.addView(button,android.widget.FrameLayout.LayoutParams(160,90).apply { leftMargin=420;topMargin=250 })
+        view.measure(View.MeasureSpec.makeMeasureSpec(1000,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(600,View.MeasureSpec.EXACTLY))
+        view.layout(0,0,1000,600)
+        attachForClicks(view)
+        physicalTap(view,500f,290f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(90))
+        physicalTap(view,500f,290f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertEquals(2,clicks);assertEquals(0,player.commands);assertTrue(player.playWhenReady)
+    }
+    @Test fun fullscreenBackAndSpeedControlsKeepTheirClickActions() {
+        val player = TestPlayer(true)
+        val root = fullScreen(player)
+        attachForClicks(root)
+        for (id in listOf(R.id.video_back,R.id.video_speed)) {
+            val button = root.findViewById<View>(id)
+            var clicks = 0
+            button.setOnClickListener { clicks++ }
+            physicalTap(root,button.x+button.width/2f,button.y+button.height/2f)
+            shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+            assertEquals(1,clicks)
+        }
+        assertEquals(0,player.commands)
+    }
+    @Test fun interveningControlTapCannotCombineTwoPictureTapsIntoDoubleTap() {
+        val player = TestPlayer(true)
+        val view = video(player)
+        view.hideController()
+        var clicks = 0
+        val button = android.widget.Button(view.context).apply { setOnClickListener { clicks++ } }
+        view.addView(button,android.widget.FrameLayout.LayoutParams(70,80).apply { leftMargin=450;topMargin=260 })
+        view.measure(View.MeasureSpec.makeMeasureSpec(1000,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(600,View.MeasureSpec.EXACTLY))
+        view.layout(0,0,1000,600)
+        attachForClicks(view)
+        physicalTap(view,560f,300f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(50))
+        physicalTap(view,500f,300f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(50))
+        physicalTap(view,560f,300f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertEquals(1,clicks);assertEquals(0,player.commands);assertTrue(player.playWhenReady)
+    }
+    @Test fun disabledPlayPauseControlCannotBecomePictureDoubleTap() {
+        val player = TestPlayer(true)
+        val view = video(player)
+        val button = android.widget.ImageButton(view.context).apply {
+            id = androidx.media3.ui.R.id.exo_play_pause
+            isEnabled = false
+        }
+        view.addView(button,android.widget.FrameLayout.LayoutParams(160,100).apply { leftMargin=420;topMargin=250 })
+        view.measure(View.MeasureSpec.makeMeasureSpec(1000,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(600,View.MeasureSpec.EXACTLY))
+        view.layout(0,0,1000,600)
+        physicalTap(view,500f,300f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(90))
+        physicalTap(view,500f,300f)
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(400))
+        assertEquals(0,player.commands);assertTrue(player.playWhenReady)
     }
     @Test fun favoriteAddIsIdempotentAndRemovePreservesOtherEntries() {
         val a = Entry(listOf(Uri.parse("file:///a.mp3")))

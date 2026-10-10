@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.PinnedSongsDecorationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:50:31.514Z" hostname="MacBook-Pro.local" time="0.072">
+  <properties/>
+  <testcase name="mixedGridRowSeparatesEachColumnWithoutCrossingPinnedCard" classname="org.akanework.gramophone.ui.PinnedSongsDecorationTest" time="0.034"/>
+  <testcase name="emptyBoundaryDoesNotDrawExtraLine" classname="org.akanework.gramophone.ui.PinnedSongsDecorationTest" time="0.02"/>
+  <testcase name="listDividerUsesThemeColorAtBoundaryOnly" classname="org.akanework.gramophone.ui.PinnedSongsDecorationTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

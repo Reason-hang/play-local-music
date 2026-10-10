@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.HomeTabsRegressionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-10T13:59:00.786Z" hostname="MacBook-Pro.local" time="0.068">
+  <properties/>
+  <testcase name="legacyTabOrderPreservesVisibleAndHiddenChoicesWhileRemovingFilesystem" classname="org.akanework.gramophone.ui.HomeTabsRegressionTest" time="0.02"/>
+  <testcase name="tabOrderSettingsRenderFourLabelsWithoutRewritingLegacyPreference" classname="org.akanework.gramophone.ui.HomeTabsRegressionTest" time="0.028"/>
+  <testcase name="defaultHomepageKeepsFourDistinctMediaEntrances" classname="org.akanework.gramophone.ui.HomeTabsRegressionTest" time="0.009"/>
+  <testcase name="legacyFilesystemOnlyHomepageFallsBackToSongsInsteadOfEmptyPage" classname="org.akanework.gramophone.ui.HomeTabsRegressionTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

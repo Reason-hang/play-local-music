@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.library.LegacyFavoriteAuthorityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:49:40.270Z" hostname="MacBook-Pro.local" time="0.815">
+  <properties/>
+  <testcase name="pureAbstractPlaylistMembersAreRetainedWhenAddingFavorite" classname="org.akanework.gramophone.logic.library.LegacyFavoriteAuthorityTest" time="0.705"/>
+  <testcase name="newerPhysicalFileRemainsAuthoritativeOnAndroid10" classname="org.akanework.gramophone.logic.library.LegacyFavoriteAuthorityTest" time="0.045"/>
+  <testcase name="newerAbstractMembersAreRetainedWhenAddingFavorite" classname="org.akanework.gramophone.logic.library.LegacyFavoriteAuthorityTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

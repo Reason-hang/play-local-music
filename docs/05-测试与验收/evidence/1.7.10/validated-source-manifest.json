@@ -1,0 +1,45 @@
+{
+  "versionName": "1.7.10",
+  "versionCode": 43,
+  "baseCommit": "a45284663f929e5161f6b3eff770c9b78184f6d5",
+  "tests": {
+    "Local": {
+      "tests": 120,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "Course": {
+      "tests": 120,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "lint": {
+    "Local": {
+      "Error": 0,
+      "Fatal": 0,
+      "Warning": 140
+    },
+    "Course": {
+      "Error": 0,
+      "Fatal": 0,
+      "Warning": 147
+    }
+  },
+  "sourceSha256": {
+    "app/build.gradle.kts": "cc64dc36e7ba58ad2eef86a42a07aa013807db3da5932d30de04e980a649ff06",
+    "app/src/main/java/org/akanework/gramophone/ui/adapters/ViewPager2Adapter.kt": "ceeaa0b0eae78add055e80dad2c1db377e7c435a3b01f1007303ba0db0c2edc1",
+    "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt": "40d79824a9a97d47a1b226c24c0b31290b353959a59c2047de94ba7bfa4359c4",
+    "app/src/main/res/xml/settings_appearance.xml": "02b4d1f2a6ded06c615c341a60d3df24b0e9065f8dc545116f1bc1be2210bd62",
+    "app/src/test/java/org/akanework/gramophone/ui/HomeTabsRegressionTest.kt": "d0d300e201ff70f3d2a615331a316774c1d35f4398d55ec6ae87730382b784dd",
+    "app/src/test/java/org/akanework/gramophone/ui/InteractionBehaviorTest.kt": "59dbb250dbaa9dd0891a742f6eabe212aaa8f7160d7d3c4a77d948b9339418e9"
+  },
+  "device": {
+    "model": "24122RKC7C",
+    "api": 36,
+    "localCandidate": "用户确认显示/隐藏均暂停继续；1.7.10.gesture-check/43",
+    "courseFinal": "待正式包复核"
+  }
+}

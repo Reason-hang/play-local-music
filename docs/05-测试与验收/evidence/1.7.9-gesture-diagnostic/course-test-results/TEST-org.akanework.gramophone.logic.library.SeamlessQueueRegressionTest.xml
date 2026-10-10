@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:50:18.498Z" hostname="MacBook-Pro.local" time="1.225">
+  <properties/>
+  <testcase name="duplicateMediaOccurrencesKeepSelectedPosition" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.967"/>
+  <testcase name="clickingCurrentFirstSongDoesNotDuplicateItOrAdvancePlayback" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.117"/>
+  <testcase name="currentSongCanMoveFromFirstToMiddle" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.041"/>
+  <testcase name="pinnedCurrentSongMovesToFirstWithoutPlayingSecond" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.04"/>
+  <testcase name="currentLastSongMovesToFirstAndKeepsExpectedNext" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.027"/>
+  <testcase name="favoriteMetadataRefreshKeepsCurrentSongAndPosition" classname="org.akanework.gramophone.logic.library.SeamlessQueueRegressionTest" time="0.032"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

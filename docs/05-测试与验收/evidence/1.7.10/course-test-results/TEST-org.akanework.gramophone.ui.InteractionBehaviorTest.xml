@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.InteractionBehaviorTest" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-10-10T13:59:00.864Z" hostname="MacBook-Pro.local" time="5.493">
+  <properties/>
+  <testcase name="translatedCentralButtonKeepsItsOriginalSingleClickAction" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.66"/>
+  <testcase name="interveningControlTapCannotCombineTwoPictureTapsIntoDoubleTap" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.084"/>
+  <testcase name="actualFullscreenLayoutWithVisibleControlsDoubleTapPausesAndResumes" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.074"/>
+  <testcase name="centralDoubleTapPausesOnceAndNextDoubleTapResumesOnce" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.034"/>
+  <testcase name="bufferingDoubleTapPausesPlaybackIntent" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.038"/>
+  <testcase name="favoriteAddIsIdempotentAndRemovePreservesOtherEntries" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.01"/>
+  <testcase name="savedStateRetainsActiveAndQueuedFavoriteTargets" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.307"/>
+  <testcase name="doubleTapOnOtherCentralButtonDoesNotTogglePlayback" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.047"/>
+  <testcase name="singleTapDoesNotTogglePlayback" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.037"/>
+  <testcase name="actualFullscreenLayoutWithHiddenControlsDoubleTapPauses" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.04"/>
+  <testcase name="fullscreenBlankLeftAreaAlsoRecognizesDoubleTap" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.055"/>
+  <testcase name="disabledPlayPauseControlCannotBecomePictureDoubleTap" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.043"/>
+  <testcase name="progressBarInsideCentralRegionRetainsItsOwnTouchHandling" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.056"/>
+  <testcase name="fullscreenBackAndSpeedControlsKeepTheirClickActions" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.052"/>
+  <testcase name="recordedRedmiRightOfCenterDoubleTapWorksWithVisibleAndHiddenControls" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="0.074"/>
+  <testcase name="homepageBarIsCollapsedWithoutQueueAndDoesNotDependOnScrolling" classname="org.akanework.gramophone.ui.InteractionBehaviorTest" time="3.794"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,56 @@
+{
+  "baseCommit": "a45284663f929e5161f6b3eff770c9b78184f6d5",
+  "gitCommitted": false,
+  "purpose": "只增加本地诊断，等待实机根因",
+  "tests": {
+    "local": {
+      "tests": 110,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "course": {
+      "tests": 110,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "apks": [
+    {
+      "app": "本地听歌",
+      "package": "org.akanework.gramophone",
+      "versionName": "1.7.9.gesture-diagnostic",
+      "versionCode": 42,
+      "path": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/outputs/本地听歌-1.7.9-双击诊断.apk",
+      "sha256": "f18b98e08aba408afb359f76e7e8a4918dbdc3f7433b1c529406fd936831cb27",
+      "certificateSha256": "75f7f5d3d941a646abdd9c981afedbdba6215a8e0533a94dfebd3d950fee2b1c",
+      "debuggable": false,
+      "zip": true,
+      "zipalign16KiB": true,
+      "v1": true,
+      "v2": true,
+      "purpose": "诊断，未宣称修复"
+    },
+    {
+      "app": "多听课程",
+      "package": "org.akanework.gramophone.course",
+      "versionName": "1.7.9.gesture-diagnostic",
+      "versionCode": 42,
+      "path": "/Users/lizhihang/Documents/Codex/2026-08-03/referenced-chatgpt-conversation-this-is-an/work/Gramophone/outputs/多听课程-1.7.9-双击诊断.apk",
+      "sha256": "d778b5f62b27c9765385b54a4bd6a511231f4ff1a56fcbebb2775380c5c0632d",
+      "certificateSha256": "75f7f5d3d941a646abdd9c981afedbdba6215a8e0533a94dfebd3d950fee2b1c",
+      "debuggable": false,
+      "zip": true,
+      "zipalign16KiB": true,
+      "v1": true,
+      "v2": true,
+      "purpose": "诊断，未宣称修复"
+    }
+  ],
+  "sourceSha256": {
+    "app/src/main/java/org/akanework/gramophone/ui/components/VideoGesturePlayerView.kt": "0b696c0a2c8d295ab368a11c8c90c15fee45171a5ac73ebb4956411157bd342a",
+    "app/src/main/java/org/akanework/gramophone/ui/VideoPlayerActivity.kt": "7cf4527c2713c11855e628f2ff5e14fdbae85c58edfff089775ebc4fcc1536e4",
+    "app/src/test/java/org/akanework/gramophone/ui/InteractionBehaviorTest.kt": "20e46b9afbca0ee6e1c07ba3bf9778abb7c41fe033cd57195f6e01889c52f44b"
+  }
+}

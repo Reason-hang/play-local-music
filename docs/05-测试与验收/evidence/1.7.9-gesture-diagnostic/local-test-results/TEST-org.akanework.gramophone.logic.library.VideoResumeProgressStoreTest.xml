@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:49:41.720Z" hostname="MacBook-Pro.local" time="0.282">
+  <properties/>
+  <testcase name="restoresProgressWhenAnotherEntryOnlyProvidesTheMediaStoreId" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.167"/>
+  <testcase name="restoresOnlyMatchingVideoFingerprint" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.017"/>
+  <testcase name="keepsSeparateProgressForEachVideoAfterStoreIsRecreated" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.029"/>
+  <testcase name="restoresProgressWhenThePlayerOnlyProvidesTheMediaStoreId" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.014"/>
+  <testcase name="restoresProgressWhenThePlayerDoesNotExposeTheModificationTime" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.025"/>
+  <testcase name="finishedVideoStartsFromBeginning" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.015"/>
+  <testcase name="audioDoesNotCreateVideoResumeRecord" classname="org.akanework.gramophone.logic.library.VideoResumeProgressStoreTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

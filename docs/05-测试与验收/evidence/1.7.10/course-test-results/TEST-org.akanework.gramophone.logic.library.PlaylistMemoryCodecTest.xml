@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.library.PlaylistMemoryCodecTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-10T13:58:59.385Z" hostname="MacBook-Pro.local" time="0.071">
+  <properties/>
+  <testcase name="fileDescriptorCanReadAndWriteWhileHoldingTheSameExclusiveLock" classname="org.akanework.gramophone.logic.library.PlaylistMemoryCodecTest" time="0.028"/>
+  <testcase name="allExistingPlaylistFormatsRoundTripInMemoryWithOriginalRelativeBase" classname="org.akanework.gramophone.logic.library.PlaylistMemoryCodecTest" time="0.03"/>
+  <testcase name="repeatedFavoritePreservesFirstPositionAndDeduplicatesOnlySelectedEntry" classname="org.akanework.gramophone.logic.library.PlaylistMemoryCodecTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

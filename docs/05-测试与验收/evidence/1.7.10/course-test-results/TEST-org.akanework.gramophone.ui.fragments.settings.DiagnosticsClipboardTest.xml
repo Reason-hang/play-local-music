@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.fragments.settings.DiagnosticsClipboardTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-10T13:59:07.414Z" hostname="MacBook-Pro.local" time="0.282">
+  <properties/>
+  <testcase name="crashDialogProvidesCopyButtonAndSelectableText" classname="org.akanework.gramophone.ui.fragments.settings.DiagnosticsClipboardTest" time="0.273"/>
+  <testcase name="pageCopyHelperCopiesTheProvidedDiagnosticText" classname="org.akanework.gramophone.ui.fragments.settings.DiagnosticsClipboardTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Invalid ID 0x00000000.
+Invalid ID 0x00000000.
+]]></system-err>
+</testsuite>

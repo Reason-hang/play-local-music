@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.ui.RowInteractionRegressionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:50:31.597Z" hostname="MacBook-Pro.local" time="0.73">
+  <properties/>
+  <testcase name="moveUpdatesPositionWithoutRebindingClickedObject" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.272"/>
+  <testcase name="dataSetInvalidationRejectsRowClickUntilNextLayout" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.085"/>
+  <testcase name="firstFavoriteReceivesActualTouchAtItsCenter" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.08"/>
+  <testcase name="legacy177GuardDispatchesNegativeIndexAfterInvalidation" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.06"/>
+  <testcase name="concatPreventsRepeatedChildAttachCallback" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.125"/>
+  <testcase name="concatHeaderDoesNotShiftSongIndex" classname="org.akanework.gramophone.ui.RowInteractionRegressionTest" time="0.105"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

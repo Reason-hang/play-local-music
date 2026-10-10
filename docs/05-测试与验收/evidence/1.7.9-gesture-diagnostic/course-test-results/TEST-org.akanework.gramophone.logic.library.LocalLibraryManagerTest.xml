@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.logic.library.LocalLibraryManagerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:50:18.307Z" hostname="MacBook-Pro.local" time="0.096">
+  <properties/>
+  <testcase name="oldStateWithoutPinnedFieldRemainsReadable" classname="org.akanework.gramophone.logic.library.LocalLibraryManagerTest" time="0.017"/>
+  <testcase name="pinningPersistsOrderAndUnpinningDoesNotAffectOtherState" classname="org.akanework.gramophone.logic.library.LocalLibraryManagerTest" time="0.066"/>
+  <testcase name="restoringSelectedRecordKeepsOtherMediaHidden" classname="org.akanework.gramophone.logic.library.LocalLibraryManagerTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

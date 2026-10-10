@@ -58,7 +58,7 @@
 
     <PreferenceCategory
         android:layout="@layout/preference_category_md"
-        android:title="@string/settings_preference_category_folders_filesystem">
+        android:title="@string/folders">
 
         <SwitchPreferenceCompat
             android:defaultValue="true"

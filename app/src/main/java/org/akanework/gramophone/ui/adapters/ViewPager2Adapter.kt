@@ -122,7 +122,7 @@ class ViewPager2Adapter(
                     else
                         try {
                             val t = Tab.valueOf(it)
-                            if (t in setOf(Tab.Albums, Tab.Genres, Tab.Dates)) listOf() else listOf(t)
+                            if (t in setOf(Tab.Albums, Tab.Genres, Tab.Dates, Tab.FileSystem)) listOf() else listOf(t)
                         } catch (_: IllegalArgumentException) {
                             listOf() // this tab was removed
                         }
@@ -131,11 +131,16 @@ class ViewPager2Adapter(
             Tab.entries.forEach {
                 if (stList.indexOf(it) != stList.lastIndexOf(it))
                     stList.removeAll { i -> i == it }
-                if (!stList.contains(it) && it !in setOf(Tab.Albums, Tab.Genres, Tab.Dates))
+                if (!stList.contains(it) && it !in setOf(Tab.Albums, Tab.Genres, Tab.Dates, Tab.FileSystem))
                     stList.add(it)
             }
             if (!stList.contains(null))
                 stList.add(null)
+            // A legacy configuration may have exposed only the now-removed filesystem tab.
+            if (stList.indexOf(null) == 0) {
+                stList.remove(Tab.Songs)
+                stList.add(0, Tab.Songs)
+            }
             return stList
         }
 

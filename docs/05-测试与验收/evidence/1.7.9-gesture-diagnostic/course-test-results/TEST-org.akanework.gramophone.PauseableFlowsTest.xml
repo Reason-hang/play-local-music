@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.PauseableFlowsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-10T12:50:16.769Z" hostname="MacBook-Pro.local" time="0.101">
+  <properties/>
+  <testcase name="testPauseableFlows" classname="org.akanework.gramophone.PauseableFlowsTest" time="0.045"/>
+  <testcase name="incrementalFlowsGroupBy" classname="org.akanework.gramophone.PauseableFlowsTest" time="0.038"/>
+  <testcase name="incrementalFlowsGroupBy2" classname="org.akanework.gramophone.PauseableFlowsTest" time="0.011"/>
+  <testcase name="incrementalFlows" classname="org.akanework.gramophone.PauseableFlowsTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

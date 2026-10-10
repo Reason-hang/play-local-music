@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.akanework.gramophone.LrcUtilsTest" tests="34" skipped="0" failures="0" errors="0" timestamp="2026-10-10T13:58:33.613Z" hostname="MacBook-Pro.local" time="0.962">
+  <properties/>
+  <testcase name="testBidirectionalWordSplitting" classname="org.akanework.gramophone.LrcUtilsTest" time="0.039"/>
+  <testcase name="testParserTtmlTemplate" classname="org.akanework.gramophone.LrcUtilsTest" time="0.081"/>
+  <testcase name="testBogusOffsetMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.021"/>
+  <testcase name="testNegativeOffsetMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.017"/>
+  <testcase name="testLongSyncTimestamp" classname="org.akanework.gramophone.LrcUtilsTest" time="0.019"/>
+  <testcase name="testSyntheticNewLineMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.018"/>
+  <testcase name="testCompressedWordScaling" classname="org.akanework.gramophone.LrcUtilsTest" time="0.021"/>
+  <testcase name="testTemplateLrcTrimToggle" classname="org.akanework.gramophone.LrcUtilsTest" time="0.033"/>
+  <testcase name="testDualOffsetMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.022"/>
+  <testcase name="voiceInsteadOfVoice1WhenNoVoice2" classname="org.akanework.gramophone.LrcUtilsTest" time="0.023"/>
+  <testcase name="testOnlyWordSyncPoints" classname="org.akanework.gramophone.LrcUtilsTest" time="0.013"/>
+  <testcase name="testTemplateLrcZeroTimestamps" classname="org.akanework.gramophone.LrcUtilsTest" time="0.02"/>
+  <testcase name="testOffsetMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.033"/>
+  <testcase name="testTemplateLrcRenderBenchmark" classname="org.akanework.gramophone.LrcUtilsTest" time="0.069"/>
+  <testcase name="testTemplateLrcSyntheticNewlines" classname="org.akanework.gramophone.LrcUtilsTest" time="0.044"/>
+  <testcase name="testParserSkippedDoesNotEatNewlines" classname="org.akanework.gramophone.LrcUtilsTest" time="0.058"/>
+  <testcase name="tsZeroIsNotTranslated" classname="org.akanework.gramophone.LrcUtilsTest" time="0.024"/>
+  <testcase name="voice1WhenThereIsVoice2" classname="org.akanework.gramophone.LrcUtilsTest" time="0.034"/>
+  <testcase name="testTemplateLrc1" classname="org.akanework.gramophone.LrcUtilsTest" time="0.028"/>
+  <testcase name="testTemplateLrc2" classname="org.akanework.gramophone.LrcUtilsTest" time="0.021"/>
+  <testcase name="testTemplateLrcTranslationType1" classname="org.akanework.gramophone.LrcUtilsTest" time="0.037"/>
+  <testcase name="testCompressedWithSpaces" classname="org.akanework.gramophone.LrcUtilsTest" time="0.022"/>
+  <testcase name="testParserSkippedHello" classname="org.akanework.gramophone.LrcUtilsTest" time="0.013"/>
+  <testcase name="testSimpleMultiLineParser" classname="org.akanework.gramophone.LrcUtilsTest" time="0.017"/>
+  <testcase name="testParserSkipped2" classname="org.akanework.gramophone.LrcUtilsTest" time="0.015"/>
+  <testcase name="testTemplateLrcTranslate2Compressed" classname="org.akanework.gramophone.LrcUtilsTest" time="0.017"/>
+  <testcase name="testTemplateLrcExtendedAppleTrimToggle" classname="org.akanework.gramophone.LrcUtilsTest" time="0.036"/>
+  <testcase name="testPrintUtility" classname="org.akanework.gramophone.LrcUtilsTest" time="0.056"/>
+  <testcase name="blankInEmptyOut" classname="org.akanework.gramophone.LrcUtilsTest" time="0.018"/>
+  <testcase name="testEmptyLyricNoTranslation" classname="org.akanework.gramophone.LrcUtilsTest" time="0.014"/>
+  <testcase name="testOneLineOneWord" classname="org.akanework.gramophone.LrcUtilsTest" time="0.012"/>
+  <testcase name="explicitEndFromWordRecognized" classname="org.akanework.gramophone.LrcUtilsTest" time="0.011"/>
+  <testcase name="testParserTtmlTemplate2" classname="org.akanework.gramophone.LrcUtilsTest" time="0.036"/>
+  <testcase name="emptyInEmptyOut" classname="org.akanework.gramophone.LrcUtilsTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
